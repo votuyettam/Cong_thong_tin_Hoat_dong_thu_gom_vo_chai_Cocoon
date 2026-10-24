@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1D4A27">
+<title>Cổng thông tin Thu gom Vỏ chai Cocoon (bản demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F2F7EF; --surface:#FFFFFF; --ink:#16291C; --muted:#526656; --line:#D2E1CE;
+  --leaf:#2F6B3A; --leaf-deep:#1D4A27; --leaf-ink:#FFFFFF; --mint:#E2EFDC; --sprout:#9CCB7C;
+  --on-deep:#EAF5E3; --on-deep-muted:#B9D4AE;
+  --rose:#B3324F; --rose-bg:#FBE7EC; --amber:#8A5E0E; --amber-bg:#FBF0DA; --pending:#9AAA9C;
+  color-scheme: light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1710; --surface:#162219; --ink:#E5F0E2; --muted:#9DB4A0; --line:#2A3D2E;
+    --leaf:#7CC48A; --leaf-deep:#163A1F; --leaf-ink:#0E1710; --mint:#1C3022; --sprout:#7CC48A;
+    --on-deep:#EAF5E3; --on-deep-muted:#A9C79E;
+    --rose:#F08AA2; --rose-bg:#3A1C24; --amber:#E2B65C; --amber-bg:#2E2615; --pending:#56685A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1710; --surface:#162219; --ink:#E5F0E2; --muted:#9DB4A0; --line:#2A3D2E;
+  --leaf:#7CC48A; --leaf-deep:#163A1F; --leaf-ink:#0E1710; --mint:#1C3022; --sprout:#7CC48A;
+  --on-deep:#EAF5E3; --on-deep-muted:#A9C79E;
+  --rose:#F08AA2; --rose-bg:#3A1C24; --amber:#E2B65C; --amber-bg:#2E2615; --pending:#56685A; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.6}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+a{color:var(--leaf)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sprout);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.hide{display:none!important}
+
+/* demo flag + header */
+.demo-flag{background:var(--leaf-deep);color:var(--on-deep);font-size:13px;text-align:center;padding:5px 12px}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:18px;min-height:66px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);flex:none}
+.brand svg{width:30px;height:38px}
+.brand b{font-weight:800;letter-spacing:-.01em;line-height:1.15;font-size:15px;color:var(--leaf)}
+.brand small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+nav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:none;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px;padding:8px 12px;border-radius:999px}
+nav a:hover{color:var(--leaf)}
+nav a[aria-current="page"]{background:var(--mint);color:var(--leaf)}
+nav a.role-link{color:var(--leaf);border:1.5px solid var(--leaf)}
+.acct{display:flex;gap:8px;align-items:center;flex:none}
+.acct .who{font-size:13px;line-height:1.25;text-align:right}
+.acct .who b{display:block;font-size:14px}
+.badge{display:inline-block;white-space:nowrap;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--mint);color:var(--leaf)}
+.badge.admin{background:var(--leaf);color:var(--leaf-ink)}
+.bar{flex-wrap:wrap;column-gap:18px;row-gap:2px;padding:8px 0 0}#mainNav{order:3;flex-basis:100%;margin:0 -12px;padding-bottom:6px}.acct{margin-left:auto}
+
+main{padding:28px 0 64px}
+section[data-view]{display:none}
+section[data-view].on{display:block}
+h1{font-size:clamp(30px,4.6vw,50px);line-height:1.08;letter-spacing:-.025em;margin:0 0 14px;font-weight:800;max-width:17ch}
+h2{font-size:26px;letter-spacing:-.015em;margin:0 0 8px;line-height:1.25}
+h2.sec{margin-top:52px}
+h3{font-size:17px;margin:0 0 6px}
+p{margin:0 0 12px;max-width:68ch}
+.lead{font-size:18px;max-width:52ch}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+
+/* buttons */
+.btn{display:inline-block;text-decoration:none;border:0;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer;background:var(--leaf);color:var(--leaf-ink);line-height:1.3}
+.btn:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent;color:var(--leaf);border:1.5px solid var(--leaf)}
+.btn.light{background:var(--on-deep);color:var(--leaf-deep)}
+.btn.outline-light{background:transparent;color:var(--on-deep);border:1.5px solid var(--on-deep-muted)}
+.btn.sm{padding:7px 12px;font-size:14px;border-radius:9px}
+.btn.danger{background:transparent;color:var(--rose);border:1.5px solid var(--rose)}
+.btn:disabled{opacity:.45;cursor:not-allowed;filter:none}
+.chip{border:1px dashed var(--line);background:transparent;border-radius:8px;padding:5px 10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);text-align:left}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr .95fr;gap:24px;align-items:center;background:var(--leaf-deep);color:var(--on-deep);border-radius:28px;padding:44px 44px 36px;overflow:hidden;position:relative}
+.hero>*{min-width:0}
+.hero .lead{color:var(--on-deep-muted)}
+.hero .kicker{color:var(--sprout);font-weight:700;margin-bottom:10px}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.hero-art{position:relative;min-height:260px;display:flex;align-items:flex-end;justify-content:center;gap:4px}
+.hero-art::before{content:"";position:absolute;width:320px;height:320px;max-width:90%;aspect-ratio:1;border-radius:50%;background:var(--leaf);opacity:.55;left:50%;top:50%;transform:translate(-50%,-48%)}
+.hero-art svg{position:relative;height:auto}
+@media (max-width:860px){.hero{grid-template-columns:1fr;padding:30px 22px}.hero-art{min-height:170px}.hero-art svg{flex:1 1 0;min-width:0;max-height:160px}.hero-art::before{width:180px;height:180px;top:58%}}
+
+.camp-strip{display:grid;grid-template-columns:auto 1fr auto;gap:18px 28px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px 24px;margin-top:-22px;position:relative;z-index:1;width:calc(100% - 48px);margin-left:24px}
+.countdown{display:grid;grid-template-columns:auto auto;column-gap:10px;align-items:baseline}
+.countdown strong{font-size:44px;line-height:1;color:var(--leaf);letter-spacing:-.03em;grid-row:span 2;font-variant-numeric:tabular-nums}
+.countdown span{font-weight:700;line-height:1.2}
+.countdown small{color:var(--muted);font-size:13px}
+.rule-mini{font-size:15px}
+.rule-mini .no{display:inline-block;margin-top:4px;color:var(--rose);font-weight:600;font-size:14px}
+@media (max-width:760px){.camp-strip{grid-template-columns:1fr;width:auto;margin:14px 0 0}}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:30px;border-top:2px solid var(--leaf);}
+.stat{padding:16px 18px 4px 0}
+.stat strong{display:block;font-size:30px;letter-spacing:-.02em;line-height:1.15;font-variant-numeric:tabular-nums;color:var(--leaf)}
+.stat span{font-size:14px;color:var(--muted)}
+@media (max-width:760px){.stats{grid-template-columns:1fr 1fr}}
+
+.steps3{list-style:none;padding:0;margin:18px 0 0;display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s}
+.steps3 li{counter-increment:s;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px}
+.steps3 li::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--leaf);color:var(--leaf-ink);font-weight:800;margin-bottom:10px}
+@media (max-width:760px){.steps3{grid-template-columns:1fr}}
+
+/* products */
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px;margin-top:18px}
+.prod{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.prod .ph{display:flex;align-items:flex-end;justify-content:center;height:170px;padding-top:14px}
+.prod .ph img{width:100%;height:100%;object-fit:cover}
+.prod .ph svg{height:140px;width:auto}
+.prod figcaption{padding:12px 14px 14px}
+.prod figcaption b{display:block;font-size:15px;line-height:1.3}
+.prod figcaption span{font-size:13px;color:var(--muted)}
+.caption-note{font-size:13px;color:var(--muted);margin-top:10px}
+
+/* journey */
+.journey{list-style:none;margin:0;padding:0;position:relative}
+.journey li{position:relative;padding:0 0 24px 52px}
+.journey li::before{content:"";position:absolute;left:15px;top:30px;bottom:-2px;width:4px;border-radius:2px;background:var(--line)}
+.journey li.done:not(.current)::before{background:var(--leaf)}
+.journey li:last-child::before{display:none}
+.journey .dot{position:absolute;left:0;top:0;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:14px;background:var(--surface);border:3px solid var(--pending);color:var(--pending)}
+.journey li.done .dot{background:var(--leaf);border-color:var(--leaf);color:var(--leaf-ink)}
+.journey li.current .dot{box-shadow:0 0 0 6px color-mix(in srgb,var(--leaf) 22%,transparent)}
+.journey li.warn .dot{border-color:var(--amber);color:var(--amber)}
+.journey h3{margin:4px 0 2px}
+.journey li:not(.done) h3{color:var(--muted)}
+.evidence{font-size:14px;color:var(--muted)}
+.evidence b{color:var(--ink)}
+.notice{margin-top:4px;padding:14px 16px;border-left:4px solid var(--amber);background:var(--amber-bg);border-radius:0 10px 10px 0;font-size:14px;max-width:68ch}
+.empty{padding:20px;border:1.5px dashed var(--line);border-radius:14px;max-width:640px}
+.lookup{display:flex;gap:8px;margin:18px 0 10px;max-width:540px}
+.lookup input{flex:1;min-width:0;padding:13px 16px;border:2px solid var(--line);border-radius:12px;background:var(--surface);font-size:17px;font-weight:600;text-transform:uppercase}
+.lookup input::placeholder{text-transform:none;font-weight:400;color:var(--muted)}
+.lookup input:focus{border-color:var(--leaf);outline:none}
+.tries{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted)}
+.result-head{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:baseline;margin:28px 0 6px}
+.result-head h2{margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:8px 28px;margin:8px 0 22px;font-size:15px}
+.facts div span{display:block;color:var(--muted);font-size:13px}
+
+/* points */
+.points{display:grid;grid-template-columns:240px 1fr;gap:28px;margin-top:22px}
+@media (max-width:760px){.points{grid-template-columns:1fr}.points .schema{max-width:260px}}
+.schema{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px;align-self:start}
+.schema svg{width:100%;height:auto;display:block}
+.schema .node{cursor:pointer}
+.schema .node circle{fill:var(--surface);stroke:var(--leaf);stroke-width:3}
+.schema .node.sel circle{fill:var(--leaf)}
+.schema text{fill:var(--ink);font-size:13px;font-weight:600;font-family:inherit}
+.filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.filters button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;cursor:pointer}
+.filters button[aria-pressed="true"]{background:var(--leaf);color:var(--leaf-ink);border-color:var(--leaf)}
+.plist{display:grid;gap:10px}
+.prow{display:grid;grid-template-columns:1fr auto;gap:4px 16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.prow .meta{font-size:14px;color:var(--muted)}
+.pill{display:inline-block;font-size:13px;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;align-self:start}
+.pill.open{background:var(--mint);color:var(--leaf)}
+.pill.full{background:var(--amber-bg);color:var(--amber)}
+.pill.paused{background:var(--rose-bg);color:var(--rose)}
+
+/* panels, tables */
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin-top:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px}
+.panel ol,.panel ul{margin:8px 0 0;padding-left:20px}
+.panel li{margin-bottom:6px}
+.tablewrap{overflow-x:auto;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+tfoot td{font-weight:700;border-bottom:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+
+/* forms */
+form.f{display:grid;gap:14px;max-width:620px;margin-top:16px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:560px){.row2,.row3{grid-template-columns:1fr}}
+label.fl{display:grid;gap:5px;font-size:14px;font-weight:600}
+label.fl input,label.fl select,label.fl textarea,select.sel{font-weight:400;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);font-size:16px;width:100%}
+label.fl input:focus,label.fl select:focus,label.fl textarea:focus{border-color:var(--leaf);outline:none}
+label.check{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:14px}
+label.check input{margin-top:5px;accent-color:var(--leaf)}
+.hint{font-weight:400;color:var(--muted);font-size:13px}
+.calc{padding:12px 14px;border-radius:12px;background:var(--mint);font-size:15px}
+.err{color:var(--rose);font-size:14px;font-weight:600;margin:0;min-height:0}
+.err:empty{display:none}
+.scale{display:flex;gap:6px;flex-wrap:wrap}
+.scale label{display:flex}
+.scale input{position:absolute;opacity:0;pointer-events:none}
+.scale span{min-width:44px;text-align:center;padding:8px 0;border:1.5px solid var(--line);border-radius:10px;cursor:pointer;font-weight:700;background:var(--surface)}
+.scale input:checked+span{background:var(--leaf);color:var(--leaf-ink);border-color:var(--leaf)}
+.scale input:focus-visible+span{outline:3px solid var(--sprout);outline-offset:2px}
+fieldset{border:0;padding:0;margin:0}
+legend{font-size:14px;font-weight:600;margin-bottom:6px;padding:0}
+
+/* auth */
+.auth{display:grid;grid-template-columns:minmax(0,460px) 1fr;gap:28px;align-items:stretch}
+.auth-card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:28px}
+.auth-card form.f{max-width:none}
+.auth-art{background:var(--leaf-deep);color:var(--on-deep);border-radius:22px;padding:28px;display:flex;flex-direction:column;justify-content:space-between;gap:18px}
+.auth-art p{color:var(--on-deep-muted)}
+.auth-art .shelf{display:flex;align-items:flex-end;justify-content:center;gap:2px}
+.auth-art ul{margin:0;padding-left:20px;color:var(--on-deep)}
+.demo-acc{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line);display:grid;gap:6px}
+@media (max-width:860px){.auth{grid-template-columns:1fr}.auth-art{order:-1}}
+
+/* profile */
+.pf-top{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;margin-top:18px}
+@media (max-width:860px){.pf-top{grid-template-columns:1fr}}
+.pointcard{background:var(--leaf-deep);color:var(--on-deep);border-radius:22px;padding:24px}
+.pointcard .big{font-size:56px;font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.pointcard .unit{color:var(--on-deep-muted);font-weight:600}
+.progress{height:12px;border-radius:6px;background:color-mix(in srgb,var(--on-deep) 20%,transparent);overflow:hidden;margin:16px 0 8px}
+.progress i{display:block;height:100%;background:var(--sprout);border-radius:6px}
+.pointcard p{color:var(--on-deep-muted)}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mini div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.mini strong{display:block;font-size:26px;line-height:1.2;color:var(--leaf);font-variant-numeric:tabular-nums}
+.mini span{font-size:13px;color:var(--muted)}
+.hist{display:grid;gap:10px;margin-top:12px}
+.hrow{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.hrow-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px;align-items:baseline}
+.hrow .jbox{margin-top:16px}
+.st{font-size:13px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--mint);color:var(--leaf);white-space:nowrap}
+.st.warn{background:var(--amber-bg);color:var(--amber)}
+.st.mute{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+.linkbtn{background:none;border:0;padding:0;color:var(--leaf);font-weight:600;cursor:pointer;text-decoration:underline;font-size:14px}
+
+/* admin */
+.adm-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:flex-start}
+.tabs{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--line);margin:18px 0 20px;scrollbar-width:none}
+.tabs button{flex:none;border:0;background:none;padding:10px 14px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--leaf);border-bottom-color:var(--leaf)}
+.toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:16px}
+.toolbar label.fl{min-width:170px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:4px 0 20px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.kpi span{display:block;font-size:13px;color:var(--muted)}
+.kpi strong{font-size:28px;letter-spacing:-.02em;line-height:1.2;font-variant-numeric:tabular-nums}
+.kpi em{display:block;font-style:normal;font-size:13px;font-weight:600;line-height:1.4;color:var(--muted)}
+.kpi em.ok{color:var(--leaf)} .kpi em.bad{color:var(--rose)}
+.bars{display:grid;gap:8px;margin-top:10px}
+.bar-row{display:grid;grid-template-columns:150px 1fr 60px;gap:10px;align-items:center;font-size:14px}
+.bar-track{height:12px;background:var(--mint);border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;background:var(--leaf);border-radius:6px}
+.bar-row .v{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.lot{border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:var(--surface);margin-bottom:10px}
+.lot-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 12px;align-items:baseline}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;align-items:flex-start}
+.recon{flex-basis:100%;display:grid;gap:10px;margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.inline-in{padding:7px 10px;border:1.5px solid var(--line);border-radius:9px;background:var(--surface)}
+td select{padding:4px 6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);font-size:14px}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;font-size:15px;max-width:min(92vw,540px);z-index:20;display:none}
+.toast.on{display:block}
+footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted);font-size:13px}
+footer .wrap{display:flex;flex-wrap:wrap;gap:8px 24px;justify-content:space-between}
+/* hoạt động */
+.acts{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:18px}
+.act{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+.act .cover{position:relative;height:130px;display:flex;align-items:flex-end;justify-content:center;gap:2px;padding-top:10px}
+.act .cover svg{height:108px;width:auto}
+.act .cover .pill{position:absolute;left:14px;top:12px}
+.act .body{padding:16px 18px 18px;display:grid;gap:8px;flex:1;align-content:start}
+.act .tag{font-size:13px;font-weight:700;color:var(--leaf)}
+.act h3{font-size:18px;line-height:1.3;margin:0}
+.act .when{font-size:14px;color:var(--muted)}
+.act .rule{font-size:14px;background:var(--mint);border-radius:10px;padding:8px 12px}
+.act .res{font-size:14px;border-left:3px solid var(--sprout);padding-left:10px}
+.act details summary{cursor:pointer;color:var(--leaf);font-weight:600;font-size:14px}
+.act details p{font-size:14px;margin:8px 0 0}
+.pill.live{background:var(--mint);color:var(--leaf)}
+.pill.soon{background:var(--amber-bg);color:var(--amber)}
+.pill.past{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+.pill.info{background:var(--surface);color:var(--leaf);border:1px solid var(--leaf)}
+.src-note{font-size:14px;padding:12px 16px;border-radius:12px;background:var(--surface);border:1px solid var(--line);max-width:none}
+/* tổng quan quản lý */
+.overview{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:color-mix(in srgb,var(--on-deep) 18%,var(--leaf-deep));border-radius:20px;overflow:hidden;margin:10px 0 20px}
+.overview>div{background:var(--leaf-deep);color:var(--on-deep);padding:16px 18px}
+.overview span{display:block;font-size:13px;color:var(--on-deep-muted)}
+.overview strong{display:block;font-size:28px;line-height:1.2;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.overview em{font-style:normal;font-size:12px;color:var(--sprout);font-weight:600}
+.feed{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:0}
+.feed li{display:grid;grid-template-columns:88px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:14px}
+.feed li:last-child{border-bottom:0}
+.feed time{color:var(--muted);font-variant-numeric:tabular-nums}
+.sub-h{margin:26px 0 4px;font-size:18px}
+.arow{display:grid;grid-template-columns:1fr auto;gap:6px 14px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);margin-bottom:10px}
+.arow.off{opacity:.6}
+.arow .actions{grid-column:1/-1;margin-top:2px}
+
+/* bài viết */
+.post-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:16px 0 4px}
+.post-tools input{flex:1 1 260px;max-width:420px;padding:10px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);font-size:16px}
+.post-tools input:focus{border-color:var(--leaf);outline:none}
+.posts{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-top:16px}
+.post{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;color:var(--ink)}
+.post:hover h3{color:var(--leaf)}
+.pcover{position:relative;background:var(--leaf-deep);color:var(--on-deep);height:150px;overflow:hidden;display:flex;align-items:flex-end;justify-content:flex-end;padding:0 10px}
+.pcover .ct{position:absolute;left:18px;top:16px;right:40%;font-weight:800;font-size:22px;line-height:1.1;letter-spacing:-.01em;color:var(--sprout)}
+.pcover .ct small{display:block;font-size:13px;font-weight:500;color:var(--on-deep-muted);margin-top:6px;letter-spacing:0}
+.pcover svg{height:118px;width:auto;flex:none}
+.post .pb{padding:14px 18px 18px;display:grid;gap:6px;align-content:start;flex:1}
+.post .meta,.article .meta{font-size:13px;color:var(--muted)}
+.post h3{font-size:18px;line-height:1.3;margin:0}
+.post p{font-size:14px;color:var(--muted);margin:0}
+.post.feature{grid-column:1/-1;display:grid;grid-template-columns:1.1fr 1fr}
+.post.feature .pcover{height:auto;min-height:240px}
+.post.feature .pcover .ct{font-size:34px}
+.post.feature .pcover svg{height:170px}
+.post.feature h3{font-size:24px}
+@media (max-width:760px){.post.feature{grid-template-columns:1fr}.post.feature .pcover{min-height:170px}.post.feature .pcover .ct{font-size:24px}.post.feature .pcover svg{height:120px}}
+.article{max-width:760px}
+.article .pcover{border-radius:20px;height:220px;margin:16px 0 20px}
+.article .pcover .ct{font-size:34px}
+.article .pcover svg{height:170px}
+.article h1{max-width:none;font-size:clamp(28px,4vw,40px)}
+.abody{font-size:17px;line-height:1.75}
+.abody h3{font-size:20px;margin:28px 0 8px}
+.abody ul,.abody ol{padding-left:22px;margin:0 0 14px}
+.abody li{margin-bottom:6px}
+.abody p{max-width:none}
+.srcbox{margin-top:28px;padding:16px 18px;border-radius:14px;background:var(--mint);font-size:14px}
+.back{display:inline-block;margin-bottom:6px;font-weight:600;text-decoration:none}
+
+/* ===== Laptop: khu quản lý có thanh bên ===== */
+@media (min-width:1100px){
+  .adm-layout{display:grid;grid-template-columns:210px minmax(0,1fr);gap:28px;align-items:start;margin-top:18px}
+  .adm-layout .tabs{flex-direction:column;margin:0;position:sticky;top:128px;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:8px}
+  .adm-layout .tabs button{text-align:left;border-bottom:0;margin:0;border-radius:10px;padding:10px 12px}
+  .adm-layout .tabs button[aria-selected="true"]{background:var(--mint)}
+}
+
+/* ===== Điện thoại: thanh điều hướng dưới, menu trượt, bảng dạng thẻ ===== */
+.tabbar,.m-acct{display:none}
+.sheet{position:fixed;inset:0;z-index:30;background:rgba(10,25,14,.45);display:none;align-items:flex-end}
+.sheet.on{display:flex}
+.sheet-body{background:var(--surface);width:100%;border-radius:22px 22px 0 0;padding:10px 20px calc(18px + env(safe-area-inset-bottom,0px));max-height:85vh;overflow:auto}
+.sheet-body .grip{width:44px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 10px}
+.sheet-body h3{font-size:13px;color:var(--muted);margin:14px 0 2px}
+.sheet-body a,.sheet-body button.item{display:block;width:100%;text-align:left;padding:14px 2px;border:0;border-bottom:1px solid var(--line);background:none;text-decoration:none;color:var(--ink);font-weight:600;font-size:16px;cursor:pointer}
+.sheet-body .who-m{display:flex;gap:12px;align-items:center;padding:8px 0 4px}
+.avatar{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--leaf);color:var(--leaf-ink);font-weight:800;font-size:15px;flex:none}
+@media (max-width:760px){
+  #mainNav,.acct{display:none!important}
+  .bar{flex-wrap:nowrap;min-height:58px;padding:6px 0}
+  .brand small{display:none}
+  .m-acct{display:flex;align-items:center;gap:8px;margin-left:auto;text-decoration:none;color:var(--ink);font-size:13px;font-weight:600}
+  body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;left:0;right:0;bottom:0;z-index:8;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);overflow:visible;gap:0}
+  .tabbar a,.tabbar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 2px;min-height:58px;font-size:11px;font-weight:600;color:var(--muted);text-decoration:none;background:none;border:0;border-radius:0;cursor:pointer}
+  .tabbar svg{width:23px;height:23px}
+  .tabbar a[aria-current="page"],.tabbar button[aria-expanded="true"]{color:var(--leaf);background:none}
+  .tabbar a[aria-current="page"] svg{stroke-width:2.4}
+  .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+  main{padding:16px 0 40px}
+  .wrap{padding:0 16px}
+  h1{font-size:31px}
+  h2{font-size:22px}
+  h2.sec{margin-top:40px}
+  .lead{font-size:16px}
+  .hero{border-radius:22px}
+  .cta .btn{flex:1 1 100%;text-align:center}
+  .countdown strong{font-size:38px}
+  .bar-row{grid-template-columns:96px 1fr 44px;font-size:13px}
+  .kpi strong{font-size:24px}
+  .pointcard .big{font-size:46px}
+  .mini{grid-template-columns:1fr 1fr}
+  .lookup{flex-direction:column}
+  .auth-card,.auth-art{padding:20px;border-radius:18px}
+  .toolbar label.fl{min-width:0;flex:1 1 140px}
+  .adm-head .btn{width:auto}
+}
+@media (max-width:430px){.m-acct .badge{display:none}.brand b{font-size:14px}}
+@media (max-width:640px){
+  .overview{grid-template-columns:1fr 1fr}
+  .overview strong{font-size:22px}
+  table.stack thead{display:none}
+  table.stack,table.stack tbody,table.stack tfoot,table.stack tr,table.stack td{display:block;width:100%}
+  table.stack tr{border:1px solid var(--line);border-radius:12px;padding:6px 14px;margin-bottom:10px;background:var(--surface)}
+  table.stack td{display:flex;justify-content:space-between;align-items:center;gap:14px;border:0;padding:6px 0;text-align:right}
+  table.stack td::before{content:attr(data-label);color:var(--muted);font-size:13px;font-weight:600;text-align:left;flex:none}
+  table.stack td[data-label=""]::before{content:none}
+  table.stack td:first-child{font-size:16px}
+  table.stack tfoot tr{background:var(--mint)}
+}
+
+@media (prefers-reduced-motion: no-preference){
+  .journey li{animation:rise .35s ease both}
+  .journey li:nth-child(2){animation-delay:.06s}.journey li:nth-child(3){animation-delay:.12s}
+  .journey li:nth-child(4){animation-delay:.18s}.journey li:nth-child(5){animation-delay:.24s}
+  @keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+}
+</style>
+</head>
+<body>
+<div class="demo-flag">Bản demo đồ án: mọi dữ liệu là giả định. Ngày mô phỏng 20/06/2027.</div>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="#trangchu" aria-label="Trang chủ cổng thu gom vỏ chai">
+      <svg viewBox="0 0 30 38" aria-hidden="true"><path d="M11 1h8v5l4 4v23a4 4 0 0 1-4 4h-8a4 4 0 0 1-4-4V10l4-4z" fill="none" stroke="var(--leaf)" stroke-width="2"/><path d="M9 22c5-4 9 3 12 0v11a2 2 0 0 1-2 2h-8a2 2 0 0 1-2-2z" fill="var(--sprout)"/><path d="M15 13c3 0 5 2 5 5-3 0-5-2-5-5z" fill="var(--leaf)"/></svg>
+      <span><b>Thu gom vỏ chai Cocoon</b><small>Cổng thông tin
+
+      </small></span>
+    </a>
+    <nav aria-label="Mục chính" id="mainNav">
+      <a href="#trangchu">Trang chủ</a>
+      <a href="#hoatdong">Hoạt động</a>
+      <a href="#baiviet">Bài viết</a>
+      <a href="#diemthu">Điểm thu</a>
+      <a href="#quytac">Quy tắc và tích điểm</a>
+      <a href="#hanhtrinh">Hành trình vỏ chai</a>
+      <a href="#dangkydiem">Đăng ký điểm thu</a>
+      <a href="#gopy">Góp ý</a>
+      <a href="#hoso" class="role-link" data-need="customer">Hồ sơ xanh</a>
+      <a href="#quanly" class="role-link" data-need="admin">Quản lý</a>
+    </nav>
+    <div class="acct" id="acct"></div>
+    <a class="m-acct" id="mAcct" href="#dangnhap"></a>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- C1: Trang chủ -->
+<section data-view="trangchu">
+  <div class="hero">
+    <div>
+      <p class="kicker" id="campName"></p>
+      <h1>Vỏ chai Cocoon dùng xong, mang quay lại vòng tuần hoàn</h1>
+      <p class="lead">Tìm điểm thu, xem quy tắc quy đổi và theo dõi vỏ chai bạn đã nộp được xử lý đến đâu, tất cả ở một nơi.</p>
+      <div class="cta">
+        <a class="btn light" href="#diemthu">Tìm điểm thu</a>
+        <a class="btn outline-light" href="#dangky" id="heroJoin">Tạo tài khoản tích điểm</a>
+      </div>
+    </div>
+    <div class="hero-art" id="heroArt" aria-hidden="true"></div>
+  </div>
+  <div class="camp-strip">
+    <div class="countdown"><strong id="daysLeft"></strong><span>ngày còn lại của đợt</span><small id="campDates"></small></div>
+    <div class="rule-mini"><b>10 vỏ lớn</b> hoặc <b>25 vỏ nhỏ</b> đổi 1 túi vải Cocoon. Vỏ cần được làm sạch.<br><span class="no">Đợt này không nhận vỏ mất nhãn.</span></div>
+    <a href="#quytac" class="btn ghost sm">Xem đủ quy tắc</a>
+  </div>
+  <div class="stats" id="homeStats"></div>
+  <p class="small muted" style="margin-top:8px">Số vỏ trên trang công khai chỉ tính các lô đã đối soát và được duyệt công bố.</p>
+
+  <h2 class="sec">Tham gia trong ba bước</h2>
+  <ol class="steps3">
+    <li><h3>Làm sạch vỏ chai</h3><p class="small muted" style="margin:0">Dùng hết sản phẩm, rửa sạch, để khô và giữ nguyên nhãn Cocoon.</p></li>
+    <li><h3>Mang đến điểm thu</h3><p class="small muted" style="margin:0">Chọn điểm có trạng thái “Đang nhận vỏ”. Thành viên đọc số điện thoại để được cộng điểm.</p></li>
+    <li><h3>Tích điểm và theo dõi</h3><p class="small muted" style="margin:0">Xem điểm tích lũy và hành trình lô vỏ chai trong Hồ sơ xanh của bạn.</p></li>
+  </ol>
+
+  <div class="adm-head" style="margin-top:52px;align-items:flex-end"><div><h2 style="margin:0">Hoạt động đang và sắp diễn ra</h2><p class="muted" style="margin:0">Lịch thu gom, sự kiện và các chương trình xanh của Cocoon.</p></div><a class="btn ghost sm" href="#hoatdong">Xem tất cả hoạt động</a></div>
+  <div class="acts" id="homeActs"></div>
+
+  <div class="adm-head" style="margin-top:52px;align-items:flex-end"><div><h2 style="margin:0">Bài viết mới</h2><p class="muted" style="margin:0">Quy định, hướng dẫn và tin tức về các chương trình xanh.</p></div><a class="btn ghost sm" href="#baiviet">Xem tất cả bài viết</a></div>
+  <div class="posts" id="homePosts"></div>
+
+  <h2 class="sec">Vỏ sản phẩm Cocoon được thu hồi</h2>
+  <p class="muted">Một số sản phẩm tiêu biểu theo bốn dòng chăm sóc da, tắm và dưỡng thể, chăm sóc tóc, dưỡng môi.</p>
+  <div class="products" id="prodGrid"></div>
+  <p class="caption-note"></p>
+</section>
+
+<!-- C1: Hoạt động -->
+<section data-view="hoatdong">
+  <h2>Hoạt động thu gom và chương trình xanh</h2>
+  <p class="muted">Mỗi thẻ cho biết thời gian, nơi diễn ra và quy tắc riêng của từng hoạt động, để bạn không nhầm quy tắc giữa các đợt.</p>
+  <p class="src-note">Theo công bố của Cocoon (tổng hợp trong báo cáo, mục 1.1.3): sau 5 năm, hơn <b>11 tấn vỏ chai nhựa</b> đã được đưa đi xử lý, tái chế và hơn <b>38,7 tấn pin</b> đã qua sử dụng được thu gom. Các thẻ ghi “Giả định” là dữ liệu demo.</p>
+  <div class="filters" id="actFilters" style="margin-top:16px"></div>
+  <div class="acts" id="actGrid"></div>
+</section>
+
+<!-- C1: Bài viết -->
+<section data-view="baiviet">
+  <div id="postList">
+    <h2>Bài viết</h2>
+    <p class="muted">Một nơi tổng hợp mọi thông tin về hoạt động thu gom và các chương trình xanh: quy định từng đợt, hướng dẫn tham gia, kết quả đã công bố.</p>
+    <div class="post-tools">
+      <label for="postQ" class="hide">Tìm bài viết</label>
+      <input id="postQ" type="search" placeholder="Tìm theo từ khóa, ví dụ: vỏ chai nhỏ, pin, online">
+    </div>
+    <div class="filters" id="postFilters"></div>
+    <div class="posts" id="postGrid"></div>
+  </div>
+  <article class="article hide" id="postView"></article>
+</section>
+
+<!-- C1: Điểm thu -->
+<section data-view="diemthu">
+  <h2>Điểm thu</h2>
+  <p class="muted">Trạng thái do điểm thu cập nhật trong ngày. Chọn thành phố trên sơ đồ hoặc lọc theo loại điểm.</p>
+  <div class="points">
+    <div class="schema" aria-label="Sơ đồ vị trí theo thành phố">
+      <svg viewBox="0 0 200 430" id="schema" role="group"></svg>
+      <p class="small muted" style="margin:6px 4px 0">Sơ đồ minh họa. Bản chính thức tích hợp bản đồ số.</p>
+    </div>
+    <div>
+      <div class="filters" id="statusFilters">
+        <button data-f="all" aria-pressed="true">Mọi trạng thái</button>
+        <button data-f="open" aria-pressed="false">Đang nhận vỏ</button>
+      </div>
+      <div class="filters" id="typeFilters"></div>
+      <div class="plist" id="plist"></div>
+    </div>
+  </div>
+</section>
+
+<!-- C1: Quy tắc -->
+<section data-view="quytac">
+  <h2>Quy tắc tham gia và tích điểm</h2>
+  <p class="muted">Quy tắc có thể thay đổi giữa các đợt. Trang này luôn hiển thị quy tắc còn hiệu lực.</p>
+  <div class="cols">
+    <div class="panel">
+      <h3>Chuẩn bị vỏ chai</h3>
+      <ol>
+        <li>Dùng hết sản phẩm, rửa sạch và để khô.</li>
+        <li>Giữ nguyên nhãn Cocoon trên vỏ.</li>
+        <li>Tách riêng vỏ lớn và vỏ nhỏ để kiểm đếm nhanh.</li>
+        <li>Mang đến điểm thu có trạng thái “Đang nhận vỏ”.</li>
+      </ol>
+    </div>
+    <div class="panel">
+      <h3>Quy đổi và tích điểm</h3>
+      <p class="small">Đợt hiện tại: 10 vỏ lớn hoặc 25 vỏ nhỏ đổi 1 túi vải. Thành viên xanh được quy thành điểm: <b>vỏ lớn 10 điểm, vỏ nhỏ 4 điểm, 100 điểm đổi 1 túi vải</b>. Điểm lẻ được giữ cho lần sau.</p>
+      <div class="row2">
+        <label class="fl">Vỏ lớn<input type="number" min="0" value="0" id="rcL"></label>
+        <label class="fl">Vỏ nhỏ<input type="number" min="0" value="0" id="rcS"></label>
+      </div>
+      <div class="calc" id="ruleCalc" style="margin-top:10px"></div>
+    </div>
+    <div class="panel">
+      <h3>Sau khi nộp</h3>
+      <p class="small">Điểm thu lập phiếu ghi nhận có mã riêng. Các phiếu cùng điểm thu trong một kỳ được gộp thành một lô bàn giao cho đơn vị tái chế.</p>
+      <p class="small" style="margin:0">Trạng thái “Đã tái chế hoàn tất” chỉ hiển thị khi có chứng từ xác nhận của đơn vị tái chế.</p>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:20px">
+    <h3>Phân loại vỏ lớn và vỏ nhỏ</h3>
+    <p class="small" style="margin:0"><b>Vỏ nhỏ:</b> thỏi son, tinh chất chấm mụn và sản phẩm dùng thử từ 50ml trở xuống. <b>Vỏ lớn:</b> các loại còn lại như hũ, tuýp, túi refill, lọ tinh chất, hũ mặt nạ, thạch dưỡng thủy tinh từ 30ml. Theo quy định chương trình Điểm Xanh Online 2026, <a href="#bv-BV1">xem bài viết</a>.</p>
+  </div>
+  <h3 style="margin-top:32px">Gói sử dụng</h3>
+  <div class="tablewrap"><table class="stack">
+    <thead><tr><th>Chức năng</th><th>Gói Cơ bản (không cần tài khoản)</th><th>Gói Thành viên xanh</th></tr></thead>
+    <tbody>
+      <tr><td>Xem chiến dịch, điểm thu, quy tắc</td><td>Có</td><td>Có</td></tr>
+      <tr><td>Tra cứu hành trình lô bằng mã lô</td><td>Có</td><td>Có</td></tr>
+      <tr><td>Nhận quà</td><td>Trao trực tiếp tại điểm thu</td><td>Tích điểm, đổi quà khi đủ 100 điểm</td></tr>
+      <tr><td>Lịch sử đóng góp và trạng thái từng lần nộp</td><td>Không</td><td>Có</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- C2 công khai: hành trình lô -->
+<section data-view="hanhtrinh">
+  <h2>Hành trình vỏ chai</h2>
+  <p class="muted">Nhập mã lô in trên biên nhận để xem lô đã đi đến bước nào. Trang công khai không hiển thị thông tin người nộp.</p>
+  <form class="lookup" id="lookupForm" role="search">
+    <label for="code" class="hide">Mã lô</label>
+    <input id="code" autocomplete="off" placeholder="Ví dụ LO-2027-05-C01-01" required>
+    <button class="btn" type="submit">Tra cứu</button>
+  </form>
+  <div class="tries" id="tries"></div>
+  <div id="result" aria-live="polite"></div>
+</section>
+
+<!-- C4 -->
+<section data-view="dangkydiem">
+  <h2>Đăng ký làm điểm thu</h2>
+  <p class="muted">Dành cho cửa hàng, trường học, văn phòng muốn tiếp nhận vỏ chai Cocoon. Bộ phận vận hành xét duyệt và phản hồi trong 1 ngày làm việc.</p>
+  <form class="f" id="appForm">
+    <label class="fl">Tên đơn vị<input name="org" required></label>
+    <div class="row2">
+      <label class="fl">Thành phố<select name="city" id="appCity" required></select></label>
+      <label class="fl">Quận, phường<input name="district" required></label>
+    </div>
+    <div class="row2">
+      <label class="fl">Loại điểm<select name="type" id="appType" required></select></label>
+      <label class="fl">Giờ tiếp nhận<input name="hours" placeholder="8:00–17:00" required></label>
+    </div>
+    <label class="fl">Người phụ trách<input name="contact" required></label>
+    <label class="check"><input type="checkbox" required> Tôi cam kết áp dụng đúng quy tắc tiếp nhận và lập phiếu BM01 cho mỗi lần nhận vỏ.</label>
+    <div><button class="btn" type="submit">Gửi đơn đăng ký</button></div>
+  </form>
+</section>
+
+<!-- BM04 -->
+<section data-view="gopy">
+  <h2>Đánh giá hoạt động thu gom</h2>
+  <p class="muted">Mất khoảng 2 phút. Không bắt buộc nhập mã hay họ tên.</p>
+  <form class="f" id="fbForm">
+    <label class="fl">Mã lô (không bắt buộc)<input name="code"></label>
+    <div id="fbScales"></div>
+    <label class="fl">Khi cần hỗ trợ, bạn nhận phản hồi lần đầu sau bao lâu?
+      <select name="resp"><option value="1d">Trong 1 ngày làm việc</option><option value="3d">2–3 ngày làm việc</option><option value="more">Lâu hơn</option><option value="none">Chưa liên hệ hỗ trợ</option></select>
+    </label>
+    <label class="fl">Bạn muốn Cocoon cải thiện điều gì?<textarea name="note" rows="3"></textarea></label>
+    <div><button class="btn" type="submit">Gửi đánh giá</button></div>
+  </form>
+</section>
+
+<!-- Đăng nhập -->
+<section data-view="dangnhap">
+  <div class="auth">
+    <div class="auth-card">
+      <h2>Đăng nhập</h2>
+      <p class="muted small" id="loginNote">Khách hàng xem hồ sơ và điểm tích lũy. Nhân viên, quản lý Cocoon vào khu vực quản lý.</p>
+      <form class="f" id="loginForm" novalidate>
+        <label class="fl">Email<input type="email" name="email" autocomplete="username" required></label>
+        <label class="fl">Mật khẩu<input type="password" name="pass" autocomplete="current-password" required></label>
+        <p class="err" id="loginErr" role="alert"></p>
+        <div><button class="btn" type="submit">Đăng nhập</button></div>
+      </form>
+      <p class="small" style="margin-top:14px">Chưa có tài khoản? <a href="#dangky">Đăng ký thành viên xanh</a></p>
+      <div class="demo-acc">
+        <p class="small" style="margin:0"><b>Tài khoản dùng thử</b> (bấm để điền sẵn)</p>
+        <button class="chip" data-demo="c">Khách hàng: khachhang@demo.vn, mật khẩu 123456</button>
+        <button class="chip" data-demo="a">Quản lý: admin@cocoon.demo, mật khẩu admin123</button>
+      </div>
+    </div>
+    <aside class="auth-art">
+      <div>
+        <h2>Thành viên xanh</h2>
+        <p>Mỗi lần nộp vỏ được ghi vào tài khoản của bạn, kể cả khi bạn nộp ở nhiều điểm thu khác nhau.</p>
+        <ul class="small">
+          <li>Tích điểm và đổi túi vải khi đủ 100 điểm</li>
+          <li>Xem lịch sử đóng góp</li>
+          <li>Theo dõi lô vỏ chai đến khi tái chế hoàn tất</li>
+        </ul>
+      </div>
+      <div class="shelf" data-shelf="small"></div>
+    </aside>
+  </div>
+</section>
+
+<!-- Đăng ký tài khoản -->
+<section data-view="dangky">
+  <div class="auth">
+    <div class="auth-card">
+      <h2>Đăng ký thành viên xanh</h2>
+      <p class="muted small">Dùng số điện thoại này khi nộp vỏ để được cộng điểm. Tài khoản quản lý do Cocoon cấp, không đăng ký tại đây.</p>
+      <form class="f" id="regForm" novalidate>
+        <label class="fl">Họ và tên<input name="name" autocomplete="name" required></label>
+        <div class="row2">
+          <label class="fl">Email<input type="email" name="email" autocomplete="email" required></label>
+          <label class="fl">Số điện thoại<input type="tel" name="phone" autocomplete="tel" placeholder="0901234567" required></label>
+        </div>
+        <div class="row2">
+          <label class="fl">Mật khẩu<input type="password" name="pass" autocomplete="new-password" required><span class="hint">Ít nhất 6 ký tự</span></label>
+          <label class="fl">Nhập lại mật khẩu<input type="password" name="pass2" autocomplete="new-password" required></label>
+        </div>
+        <label class="check"><input type="checkbox" name="consent"> Tôi đồng ý để Cocoon dùng họ tên, email, số điện thoại nhằm ghi nhận và hiển thị lịch sử đóng góp của tôi. Tôi có thể xóa tài khoản bất cứ lúc nào.</label>
+        <p class="err" id="regErr" role="alert"></p>
+        <div><button class="btn" type="submit">Tạo tài khoản</button></div>
+      </form>
+      <p class="small" style="margin-top:14px">Đã có tài khoản? <a href="#dangnhap">Đăng nhập</a></p>
+    </div>
+    <aside class="auth-art">
+      <div>
+        <h2>Cách tính điểm</h2>
+        <p>Vỏ lớn 10 điểm, vỏ nhỏ 4 điểm. Đủ 100 điểm, bạn tạo phiếu đổi túi vải ngay trong Hồ sơ xanh và đưa mã cho nhân viên điểm thu.</p>
+      </div>
+      <div class="shelf" data-shelf="small"></div>
+    </aside>
+  </div>
+</section>
+
+<!-- Hồ sơ khách hàng (C2) -->
+<section data-view="hoso">
+  <div class="adm-head">
+    <div><h2 id="pfHello"></h2><p class="muted small" id="pfSub" style="margin:0"></p></div>
+  </div>
+  <div class="pf-top">
+    <div class="pointcard" id="pfPoints"></div>
+    <div class="mini" id="pfStats"></div>
+  </div>
+  <h2 class="sec" style="margin-top:36px">Lịch sử đóng góp</h2>
+  <p class="muted small">Bấm “Xem hành trình” để biết lô chứa lần nộp đó đang ở bước nào.</p>
+  <div class="hist" id="pfHist"></div>
+  <div class="grid2" style="margin-top:36px">
+    <div class="panel"><h3>Phiếu đổi quà</h3><div id="pfVouch"></div></div>
+    <div class="panel">
+      <h3>Thông tin tài khoản</h3>
+      <form class="f" id="pfForm" style="max-width:none">
+        <label class="fl">Họ và tên<input name="name" required></label>
+        <label class="fl">Số điện thoại<input type="tel" name="phone" required></label>
+        <p class="err" id="pfErr" role="alert"></p>
+        <div class="actions" style="margin:0"><button class="btn sm" type="submit">Lưu thay đổi</button><button class="btn danger sm" type="button" id="delAcc">Xóa tài khoản</button></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Quản lý (I1) -->
+<section data-view="quanly">
+  <div class="adm-head">
+    <div><h2>Khu vực quản lý</h2><p class="muted small" style="margin:0">Số liệu thu gom theo kỳ, khu vực và điểm thu. Chỉ tài khoản quản lý xem được trang này.</p></div>
+    <button class="btn ghost sm" id="resetBtn">Khôi phục dữ liệu mẫu</button>
+  </div>
+  <div class="adm-layout">
+  <div class="tabs" role="tablist" id="admTabs">
+    <button role="tab" data-tab="tong" aria-selected="true">Tổng quan</button>
+    <button role="tab" data-tab="hd" aria-selected="false">Hoạt động</button>
+    <button role="tab" data-tab="bv" aria-selected="false">Bài viết</button>
+    <button role="tab" data-tab="bm01" aria-selected="false">Ghi nhận vỏ chai</button>
+    <button role="tab" data-tab="lo" aria-selected="false">Lô và đối soát</button>
+    <button role="tab" data-tab="don" aria-selected="false">Đơn đăng ký điểm thu</button>
+    <button role="tab" data-tab="tk" aria-selected="false">Tài khoản</button>
+  </div>
+  <div class="adm-body">
+  <div data-panel="tong">
+    <h3 class="sub-h" style="margin-top:0">Số liệu tổng toàn chiến dịch</h3>
+    <div class="overview" id="overview"></div>
+    <div class="grid2">
+      <div class="panel"><h3>Điểm thu thu gom nhiều nhất</h3><div class="bars" id="topPoints"></div></div>
+      <div class="panel"><h3>Nhật ký gần đây</h3><ul class="feed" id="feed"></ul></div>
+    </div>
+    <h3 class="sub-h">Phân tích theo kỳ và khu vực</h3>
+    <div class="toolbar">
+      <label class="fl">Kỳ<select id="fPeriod"><option value="all">Toàn đợt</option><option value="2027-05">Tháng 5/2027</option><option value="2027-06">Tháng 6/2027</option></select></label>
+      <label class="fl">Khu vực<select id="fCity"></select></label>
+      <button class="btn ghost sm" id="csvBtn" type="button">Tải bảng theo điểm thu (CSV)</button>
+    </div>
+    <div class="kpis" id="kpis"></div>
+    <div class="grid2">
+      <div class="panel"><h3>Vỏ hợp lệ theo khu vực</h3><div class="bars" id="byCity"></div></div>
+      <div class="panel"><h3>Vỏ hợp lệ theo tháng</h3><div class="bars" id="byMonth"></div></div>
+    </div>
+    <div class="panel" style="margin-top:20px">
+      <h3>Số lượng thu gom theo điểm thu</h3>
+      <p class="small muted" style="margin:0">Đổi trạng thái điểm ngay trong bảng; trang Điểm thu công khai cập nhật theo.</p>
+      <div class="tablewrap"><table id="pointTbl" class="stack"></table></div>
+    </div>
+    <div class="panel" style="margin-top:20px"><h3>Lô theo trạng thái</h3><div class="bars" id="byStatus"></div></div>
+  </div>
+
+  <div data-panel="bv" class="hide">
+    <div class="grid2" style="align-items:start">
+      <div class="panel">
+        <h3 id="postFormTitle">Thêm bài viết</h3>
+        <form class="f" id="postForm" style="max-width:none;margin-top:8px">
+          <input type="hidden" name="id">
+          <label class="fl">Tiêu đề<input name="title" required></label>
+          <div class="row2">
+            <label class="fl">Chuyên mục<select name="cat" id="postCat"></select></label>
+            <label class="fl">Ngày đăng<input type="date" name="date" required></label>
+          </div>
+          <div class="row2">
+            <label class="fl">Tác giả, nguồn<input name="author" placeholder="Ví dụ: Cocoon Vietnam"></label>
+            <label class="fl">Chữ trên ảnh bìa<input name="coverText" placeholder="Ví dụ: Điểm Xanh Online"></label>
+          </div>
+          <label class="fl">Tóm tắt<textarea name="summary" rows="2" required></textarea></label>
+          <label class="fl">Nội dung<textarea name="body" rows="9" required></textarea><span class="hint">Cách dòng trống giữa các đoạn. “## ” đầu dòng là tiêu đề mục, “- ” là gạch đầu dòng, “1. ” là danh sách đánh số, **chữ đậm**.</span></label>
+          <div class="row2">
+            <label class="fl">Tên nguồn gốc<input name="srcName" placeholder="Website Cocoon"></label>
+            <label class="fl">Đường dẫn bài gốc<input type="url" name="srcUrl" placeholder="https://"></label>
+          </div>
+          <label class="fl">Gắn với thẻ hoạt động<select name="act" id="postAct"></select></label>
+          <label class="check"><input type="checkbox" name="visible" checked> Hiển thị trên trang Bài viết</label>
+          <label class="check"><input type="checkbox" name="pinned"> Ghim lên đầu trang Bài viết</label>
+          <label class="check"><input type="checkbox" name="demo"> Đánh dấu là nội dung giả định</label>
+          <p class="err" id="postErr" role="alert"></p>
+          <div class="actions" style="margin:0"><button class="btn sm" type="submit">Lưu bài viết</button><button class="btn ghost sm hide" type="button" id="postCancel">Hủy sửa</button></div>
+        </form>
+      </div>
+      <div>
+        <h3>Danh sách bài viết</h3>
+        <p class="small muted">Bài ẩn không xuất hiện trên trang công khai.</p>
+        <div id="postAdmList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div data-panel="hd" class="hide">
+    <div class="grid2" style="align-items:start">
+      <div class="panel">
+        <h3 id="actFormTitle">Thêm thẻ hoạt động</h3>
+        <form class="f" id="actForm" style="max-width:none;margin-top:8px">
+          <input type="hidden" name="id">
+          <label class="fl">Tên hoạt động<input name="title" required></label>
+          <div class="row2">
+            <label class="fl">Loại<select name="type" id="actType"></select></label>
+            <label class="fl">Địa điểm<input name="place" placeholder="Ví dụ: các điểm thu trên cổng"></label>
+          </div>
+          <div class="row2">
+            <label class="fl">Ngày bắt đầu<input type="date" name="start"></label>
+            <label class="fl">Ngày kết thúc<input type="date" name="end"><span class="hint">Để trống nếu chưa có</span></label>
+          </div>
+          <label class="fl">Mô tả<textarea name="desc" rows="3"></textarea></label>
+          <label class="fl">Quy tắc riêng của hoạt động<input name="rule"></label>
+          <label class="fl">Kết quả đã công bố<input name="result"></label>
+          <label class="check"><input type="checkbox" name="visible" checked> Hiển thị trên trang Hoạt động công khai</label>
+          <label class="check"><input type="checkbox" name="demo" checked> Đánh dấu là dữ liệu giả định</label>
+          <p class="err" id="actErr" role="alert"></p>
+          <div class="actions" style="margin:0"><button class="btn sm" type="submit">Lưu thẻ hoạt động</button><button class="btn ghost sm hide" type="button" id="actCancel">Hủy sửa</button></div>
+        </form>
+      </div>
+      <div>
+        <h3>Danh sách thẻ hoạt động</h3>
+        <p class="small muted">Sửa, ẩn, lưu trữ hoặc xóa. Trạng thái tự tính theo ngày mô phỏng.</p>
+        <div id="actList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div data-panel="bm01" class="hide">
+    <div class="grid2">
+      <div>
+        <h3>Lập phiếu BM01: ghi nhận lần tiếp nhận</h3>
+        <form class="f" id="bm01" style="margin-top:8px">
+          <label class="fl">Điểm thu<select name="point" id="bmPoint"></select></label>
+          <label class="fl">Số điện thoại thành viên<input type="tel" name="phone" placeholder="Để trống nếu khách không có tài khoản"><span class="hint">Thử 0901000001 hoặc 0901000002</span></label>
+          <div class="row3">
+            <label class="fl">Vỏ lớn hợp lệ<input type="number" name="large" min="0" value="0" required></label>
+            <label class="fl">Vỏ nhỏ hợp lệ<input type="number" name="small" min="0" value="0" required></label>
+            <label class="fl">Không hợp lệ<input type="number" name="invalid" min="0" value="0"><span class="hint">mất nhãn, chưa sạch</span></label>
+          </div>
+          <div class="calc" id="bmCalc"></div>
+          <div><button class="btn" type="submit">Lưu phiếu</button></div>
+        </form>
+        <h3 style="margin-top:28px">Xác nhận phiếu đổi quà</h3>
+        <form class="lookup" id="vForm" style="margin-top:8px"><label for="vCode" class="hide">Mã phiếu đổi quà</label><input id="vCode" placeholder="Ví dụ TV-2027-0002" required><button class="btn" type="submit">Xác nhận</button></form>
+      </div>
+      <div>
+        <h3>Phiếu gần đây tại điểm này</h3>
+        <div class="tablewrap"><table id="recentTbl" class="stack"></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div data-panel="lo" class="hide">
+    <p class="small muted">Bàn giao lô, nhập số liệu đối soát BM02 với đơn vị tái chế, duyệt công bố và ghi nhận chứng từ tái chế.</p>
+    <div id="lots"></div>
+  </div>
+
+  <div data-panel="don" class="hide"><div id="apps"></div></div>
+
+  <div data-panel="tk" class="hide">
+    <p class="small muted">Số điện thoại được che một phần; quản lý chỉ thấy thông tin cần cho đối soát.</p>
+    <div class="tablewrap"><table id="usersTbl" class="stack"></table></div>
+  </div>
+  </div>
+  </div>
+</section>
+
+<!-- Không đủ quyền -->
+<section data-view="khongquyen">
+  <div class="empty" style="margin-top:20px">
+    <h2>Bạn không có quyền xem trang này</h2>
+    <p class="small" id="denyMsg"></p>
+    <a class="btn sm" href="#trangchu">Về trang chủ</a>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Bản demo. Điểm thu, tài khoản, mã phiếu, mã lô và số liệu là giả định.</span>
+    <span>Được thực hiện bởi nhóm NK5T</span>
+  </div>
+</footer>
+<nav class="tabbar" aria-label="Điều hướng nhanh">
+  <a href="#trangchu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Trang chủ</a>
+  <a href="#diemthu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>Điểm thu</a>
+  <a href="#hoatdong"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Hoạt động</a>
+  <a href="#dangnhap" id="tbMe"></a>
+  <button type="button" id="tbMore" aria-expanded="false" aria-controls="sheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Thêm</button>
+</nav>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Menu"><div class="sheet-body" id="sheetBody"></div></div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+(function(){
+const KEY='cocoon-portal-demo-v4', SKEY='cocoon-portal-session-v4';
+const TODAY='2027-06-20';
+const CAMP={name:'Thu gom vỏ chai 2027, đợt 1',start:'2027-05-01',end:'2027-08-31'};
+const PT={large:10,small:4,bag:100};
+const STEPS=[
+  {k:'ghi_nhan',t:'Đã ghi nhận',d:'Điểm thu kiểm đếm và lập phiếu BM01.'},
+  {k:'ban_giao',t:'Đã bàn giao',d:'Lô được tập kết và bàn giao cho đơn vị tái chế.'},
+  {k:'doi_soat',t:'Đã đối soát',d:'Số liệu hai bên khớp trong ngưỡng 5% (phiếu BM02).'},
+  {k:'phe_duyet',t:'Đã phê duyệt công bố',d:'ESG/CSR kiểm tra chứng từ và duyệt số liệu.'},
+  {k:'tai_che',t:'Đã tái chế hoàn tất',d:'Đơn vị tái chế gửi chứng từ xác nhận xử lý.'}
+];
+const IDX=Object.fromEntries(STEPS.map((s,i)=>[s.k,i]));
+const CITIES=[{c:'Hà Nội',y:60,x:100},{c:'Huế',y:185,x:108},{c:'Đà Nẵng',y:215,x:112},{c:'TP.HCM',y:345,x:100},{c:'Cần Thơ',y:385,x:76}];
+const TYPES={store:'Cửa hàng Cocoon',partner:'Đối tác bán lẻ',org:'Trường học, văn phòng'};
+const STATUS_TXT={open:'Đang nhận vỏ',full:'Đã đầy, chờ gom',paused:'Tạm ngưng'};
+const MONTHS=[['2027-05','Tháng 5/2027'],['2027-06','Tháng 6/2027']];
+
+/* Sản phẩm lấy từ Bảng 1.1 của báo cáo. Muốn dùng ảnh thật: điền đường dẫn ảnh vào img, ví dụ img:'images/bi-dao.jpg'. */
+const PRODUCTS=[
+  {n:'Nước tẩy trang bí đao',g:'Chăm sóc da',shape:'tall',c:'#9CC98A',img:''},
+  {n:'Sữa rửa mặt sen Hậu Giang',g:'Chăm sóc da',shape:'tube',c:'#EDB4C4',img:''},
+  {n:'Tinh chất nghệ Hưng Yên',g:'Chăm sóc da',shape:'dropper',c:'#E7A33A',img:''},
+  {n:'Thạch hoa hồng dưỡng ẩm',g:'Chăm sóc da',shape:'jar',c:'#D8708A',img:''},
+  {n:'Gel tắm đường thốt nốt An Giang',g:'Tắm và dưỡng thể',shape:'pump',c:'#C99D62',img:''},
+  {n:'Dầu gội bưởi',g:'Chăm sóc tóc',shape:'pump',c:'#B7C84E',img:''},
+  {n:'Cà phê Đắk Lắk làm sạch da chết',g:'Dưỡng môi',shape:'jar',c:'#77513A',img:''},
+  {n:'Son dưỡng dầu dừa Bến Tre',g:'Dưỡng môi',shape:'stick',c:'#E6D6B8',img:''}
+];
+
+function bottle(shape,c,h){
+  const cap='#2C3B2F', lab='rgba(255,255,255,.88)', leaf='#2F6B3A';
+  const mark=(x,y)=>`<path d="M${x} ${y+8}c0-5 4-8 9-8 0 5-4 8-9 8z" fill="${leaf}"/><rect x="${x-6}" y="${y+12}" width="20" height="2.5" rx="1" fill="${leaf}" opacity=".55"/><rect x="${x-4}" y="${y+17}" width="16" height="2" rx="1" fill="${leaf}" opacity=".35"/>`;
+  let b='';
+  if(shape==='tall') b=`<rect x="33" y="10" width="14" height="16" rx="3" fill="${cap}"/><rect x="35" y="25" width="10" height="6" fill="${c}"/><path d="M24 42q0-11 11-11h10q11 0 11 11v66q0 4-4 4H28q-4 0-4-4z" fill="${c}"/><rect x="28" y="58" width="24" height="30" rx="3" fill="${lab}"/>${mark(37,62)}`;
+  if(shape==='pump') b=`<rect x="36" y="10" width="8" height="14" rx="2" fill="${cap}"/><path d="M42 10h16v5H44z" fill="${cap}"/><rect x="31" y="22" width="18" height="9" rx="2" fill="${cap}"/><rect x="22" y="30" width="36" height="82" rx="9" fill="${c}"/><rect x="27" y="54" width="26" height="32" rx="3" fill="${lab}"/>${mark(37,59)}`;
+  if(shape==='tube') b=`<path d="M22 14h36l-6 84H28z" fill="${c}"/><rect x="22" y="12" width="36" height="5" fill="${c}" opacity=".7"/><rect x="29" y="96" width="22" height="16" rx="3" fill="${cap}"/><rect x="29" y="42" width="22" height="30" rx="3" fill="${lab}"/>${mark(36,46)}`;
+  if(shape==='jar') b=`<rect x="16" y="58" width="48" height="14" rx="4" fill="${cap}"/><rect x="14" y="70" width="52" height="42" rx="11" fill="${c}"/><rect x="22" y="78" width="36" height="24" rx="3" fill="${lab}"/>${mark(36,80)}`;
+  if(shape==='dropper') b=`<ellipse cx="40" cy="18" rx="6" ry="9" fill="${cap}"/><rect x="32" y="26" width="16" height="12" rx="2" fill="${cap}"/><rect x="25" y="37" width="30" height="75" rx="7" fill="${c}" opacity=".9"/><rect x="29" y="56" width="22" height="30" rx="3" fill="${lab}"/>${mark(36,60)}`;
+  if(shape==='stick') b=`<rect x="29" y="34" width="22" height="34" rx="5" fill="${c}"/><rect x="29" y="66" width="22" height="46" rx="3" fill="${cap}"/><rect x="32" y="40" width="16" height="22" rx="2" fill="${lab}"/><path d="M36 50c0-4 3-6 7-6 0 4-3 6-7 6z" fill="${leaf}"/>`;
+  return `<svg viewBox="0 0 80 120" ${h?`height="${h}"`:''} role="img" aria-label="Hình minh họa vỏ sản phẩm"><ellipse cx="40" cy="113" rx="24" ry="3" fill="#000" opacity=".12"/>${b}</svg>`;
+}
+const prodImg=(p,h)=>p.img?`<img src="${p.img}" alt="${p.n}" loading="lazy">`:bottle(p.shape,p.c,h);
+
+/* tiện ích */
+function hash(s){let x=5381;for(const ch of s)x=((x<<5)+x+ch.codePointAt(0))|0;return 'h'+(x>>>0).toString(36)}
+const pwh=(email,p)=>hash(email.trim().toLowerCase()+'|'+p);
+const gifts=(l,s)=>Math.floor(l/10)+Math.floor(s/25);
+const ptsOf=r=>r.large*PT.large+r.small*PT.small;
+const $=s=>document.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtD=d=>{if(!d)return'';const [y,m,dd]=d.slice(0,10).split('-');return `${dd}/${m}/${y}`};
+const nf=n=>Number(n).toLocaleString('vi-VN');
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+const mask=p=>p?p.slice(0,3)+'****'+p.slice(-3):'';
+const pct=n=>n.toFixed(1).replace('.',',');
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),3600)}
+
+/* dữ liệu mẫu */
+function seed(){
+  const U1='0901000001', U2='0901000002';
+  const points=[
+    {id:'A01',name:'Điểm thu mẫu A01',city:'TP.HCM',district:'Quận 1',type:'store',hours:'9:00–21:00',status:'open'},
+    {id:'A02',name:'Điểm thu mẫu A02',city:'TP.HCM',district:'TP. Thủ Đức',type:'org',hours:'8:00–17:00',status:'open'},
+    {id:'A03',name:'Điểm thu mẫu A03',city:'TP.HCM',district:'Quận 7',type:'partner',hours:'9:00–21:00',status:'full'},
+    {id:'B01',name:'Điểm thu mẫu B01',city:'Hà Nội',district:'Hoàn Kiếm',type:'store',hours:'9:00–21:30',status:'open'},
+    {id:'B02',name:'Điểm thu mẫu B02',city:'Hà Nội',district:'Cầu Giấy',type:'org',hours:'8:00–17:00',status:'open'},
+    {id:'C01',name:'Điểm thu mẫu C01',city:'Đà Nẵng',district:'Hải Châu',type:'partner',hours:'8:30–21:00',status:'open'},
+    {id:'D01',name:'Điểm thu mẫu D01',city:'Huế',district:'Phú Hội',type:'store',hours:'8:30–20:00',status:'paused'},
+    {id:'E01',name:'Điểm thu mẫu E01',city:'Cần Thơ',district:'Ninh Kiều',type:'partner',hours:'8:30–20:30',status:'open'}
+  ];
+  const receipts=[];
+  const mk=(start,point,lot,day,L,S,inv,ph)=>L.forEach((l,i)=>receipts.push({id:'PH-2027-'+String(start+i).padStart(4,'0'),point,lot,date:day(i),large:l,small:S[i],invalid:inv[i]||0,phone:(ph&&ph[i])||null}));
+  mk(1,'A01','LO-2027-05-A01-01',i=>`2027-05-${15+Math.floor(i/3)}T${String(10+i%3*3).padStart(2,'0')}:30`,
+     [6,8,10,12,2,10,9,11,7,10,9,8],[5,25,30,20,6,35,15,25,30,20,25,25],[1,1,0,2,0,0,1,0,0,2,0,1],{0:U1,4:U2});
+  mk(101,'C01','LO-2027-05-C01-01',i=>`2027-05-0${5+i}T15:00`,[15,4,18,10],[30,10,20,25],[1,0,0,2],{1:U1});
+  mk(201,'A02','LO-2027-06-A02-01',i=>`2027-06-0${2+i*2}T11:00`,[10,3,6],[25,8,10],[0,1,0],{1:U1});
+  mk(301,'B02','LO-2027-06-B02-01',i=>`2027-06-1${i}T16:20`,[3,9],[4,30],[2,0],{0:U2});
+  mk(401,'E01','LO-2027-06-E01-01',i=>`2027-06-1${2+i*3}T09:40`,[7,5,11],[12,20,8],[0,1,1]);
+  const lots=[
+    {id:'LO-2027-05-A01-01',point:'A01',status:'phe_duyet',handover:'2027-05-20',
+     recon:{date:'2027-05-22',partner:'Duy Tân Recycling',ours:{large:102,small:281,kg:13.8},theirs:{large:101,small:278,kg:13.6}},approve:{date:'2027-05-23'}},
+    {id:'LO-2027-05-C01-01',point:'C01',status:'tai_che',handover:'2027-05-10',
+     recon:{date:'2027-05-11',partner:'Duy Tân Recycling',ours:{large:47,small:85,kg:5.5},theirs:{large:47,small:84,kg:5.4}},approve:{date:'2027-05-12'},recycle:{doc:'XN-2027-0142',date:'2027-06-02'}},
+    {id:'LO-2027-06-A02-01',point:'A02',status:'ban_giao',handover:'2027-06-08'},
+    {id:'LO-2027-06-B02-01',point:'B02',status:'ghi_nhan'},
+    {id:'LO-2027-06-E01-01',point:'E01',status:'ghi_nhan'}
+  ];
+  const users=[
+    {id:'U1',name:'Nguyễn Minh An',email:'khachhang@demo.vn',phone:U1,pass:pwh('khachhang@demo.vn','123456'),role:'customer',created:'2027-04-28',vouchers:[{code:'TV-2027-0001',date:'2027-05-21',used:true}]},
+    {id:'U2',name:'Trần Thu Hà',email:'thuha@demo.vn',phone:U2,pass:pwh('thuha@demo.vn','123456'),role:'customer',created:'2027-05-02',vouchers:[]},
+    {id:'A1',name:'Quản lý vận hành',email:'admin@cocoon.demo',phone:'0281000000',pass:pwh('admin@cocoon.demo','admin123'),role:'admin',created:'2027-04-01',vouchers:[]}
+  ];
+  const fb=[5,4,5,3,4,5,5,4,2,5,4,5].map(q=>({q1:q}));
+  const activities=[
+    {id:'HD1',title:'Thu gom vỏ chai 2027, đợt 1',type:'thu_gom',start:'2027-05-01',end:'2027-08-31',place:'Các điểm thu đang hoạt động trên cổng',desc:'Đợt thu gom đầu tiên vận hành trên cổng thông tin, mọi lần nộp được ghi nhận bằng phiếu BM01 và theo dõi theo lô.',rule:'10 vỏ lớn hoặc 25 vỏ nhỏ đổi 1 túi vải; không nhận vỏ mất nhãn',result:'',visible:true,demo:true},
+    {id:'HD2',title:'Ngày hội thu gom vỏ chai tại trường học',type:'su_kien',start:'2027-07-12',end:'2027-07-12',place:'Điểm thu mẫu A02, TP. Thủ Đức',desc:'Hoạt động thí điểm cho nhóm sinh viên 18–30 tuổi: hướng dẫn làm sạch vỏ, đăng ký thành viên xanh và nộp vỏ tại chỗ.',rule:'Áp dụng quy tắc của đợt 1/2027',result:'',visible:true,demo:true},
+    {id:'HD3',title:'Điểm Xanh Online 2026: đổi vỏ chai nhận sản phẩm mới',type:'thu_gom',start:'2026-05-10',end:'',place:'Gửi vỏ qua bưu điện về kho Cocoon (Tây Ninh)',desc:'Đăng ký theo mẫu trực tuyến, gửi vỏ về kho Cocoon; Cocoon đối chiếu rồi gửi sản phẩm mới trong vòng 14 ngày kể từ khi nhận vỏ.',rule:'25 vỏ lớn hoặc 60 vỏ nhỏ đổi 1 sản phẩm mới (chọn 1 trong 16 sản phẩm)',result:'Năm 2025: hơn 11 tấn vỏ chai nhựa cũ được đưa đi xử lý, tái chế',visible:true,demo:false,post:'BV1'},
+    {id:'HD4',title:'Điểm Xanh tại cửa hàng',type:'thu_gom',start:'2026-06-09',end:'',place:'Cửa hàng',desc:'Chương trình thu gom vỏ chai tại điểm, triển khai từ ngày 9/6/2026.',rule:'10 vỏ lớn hoặc 25 vỏ nhỏ đổi 1 túi; không nhận vỏ mất nhãn',result:'',visible:true,demo:false,archived:true},
+    {id:'HD5',title:'Thu gom vỏ chai cùng An Khang',type:'thu_gom',start:'2025-05-08',end:'2025-08-08',place:'Phối hợp với An Khang',desc:'Chương trình phối hợp với An Khang năm 2025.',rule:'5 vỏ đổi 1 túi; chấp nhận vỏ mất nhãn',result:'',visible:true,demo:false},
+    {id:'HD6',title:'Thu hồi pin cũ, bảo vệ trái đất xanh',type:'pin',start:'',end:'',place:'103 điểm thu hồi tại Hà Nội, TP.HCM, Cần Thơ, Đà Nẵng, Huế (lần 4, năm 2025)',desc:'Cocoon cùng Trường ĐH Sư phạm TP.HCM phát động chương trình thu hồi pin đã qua sử dụng.',rule:'',result:'Hơn 38,7 tấn pin đã qua sử dụng được thu gom sau 5 năm (Cocoon công bố)',visible:true,demo:false,post:'BV3'},
+    {id:'HD8',title:'Thu hồi vỏ chai, đổi túi xanh 2025',type:'thu_gom',start:'2025-05-10',end:'',place:'161 Điểm Xanh trên ba miền',desc:'Chương trình thu hồi vỏ chai tại các Điểm Xanh trở lại từ ngày 10/5/2025.',rule:'',result:'',visible:true,demo:false,archived:true,post:'BV2'},
+    {id:'HD7',title:'Refill bằng túi bổ sung',type:'refill',start:'',end:'',place:'',desc:'Chương trình refill và sản phẩm Túi Refill giúp giảm bao bì mới.',rule:'',result:'',visible:true,demo:false}
+  ];
+  const posts=[
+    {id:'BV1',title:'Điểm Xanh Online 2026: đổi vỏ chai cũ, nhận sản phẩm mới',cat:'quy_dinh',pinned:true,date:'2026-05-09',author:'Cocoon Vietnam',coverText:'Điểm Xanh Online',act:'HD3',visible:true,demo:false,
+     srcName:'Bài “Điểm xanh online - cùng Cocoon sống xanh mỗi ngày 2026”, website Cocoon, 09/05/2026',srcUrl:'https://cocoonvietnam.com/',
+     summary:'Từ 10/5/2026, 25 vỏ chai lớn hoặc 60 vỏ chai nhỏ của Cocoon đổi được 1 sản phẩm mới. Bài tóm tắt cách phân loại vỏ, ba bước gửi vỏ và các điều kiện cần biết.',
+     body:`## Bối cảnh
+Cocoon thu hồi vỏ chai cũ từ người dùng qua chương trình Điểm Xanh Online từ năm 2021. Theo bài viết, trong năm 2025 Cocoon đã đưa đi xử lý và tái chế hơn **11 tấn vỏ chai nhựa cũ** trong dự án “Yêu lại những điều đã cũ”. Quy định mới dưới đây áp dụng từ ngày **10/5/2026**.
+
+## Quy đổi
+- **25 vỏ chai lớn hoặc 60 vỏ chai nhỏ** bất kỳ của Cocoon đổi 1 sản phẩm mới.
+- Người tham gia chọn 1 trong 16 sản phẩm ở cuối bài.
+
+## Phân loại vỏ lớn, vỏ nhỏ
+- **Vỏ nhỏ:** bao bì dạng thỏi son, tinh chất chấm mụn và sản phẩm dùng thử từ 50ml trở xuống.
+- **Vỏ lớn:** các loại còn lại, ví dụ hũ, tuýp, túi refill, lọ tinh chất, hũ mặt nạ, thạch dưỡng thủy tinh từ 30ml.
+
+## Ba bước tham gia
+1. Điền đầy đủ thông tin vào mẫu đăng ký trực tuyến của Cocoon.
+2. Đóng gói vỏ, ghi họ tên và thông tin trên kiện hàng, gửi về kho Cocoon tại Khu công nghiệp Xuyên Á, xã Đức Lập, tỉnh Tây Ninh.
+3. Cocoon đối chiếu vỏ nhận được với thông tin đăng ký, sau đó gửi sản phẩm mới qua chuyển phát.
+
+## Điều kiện cần lưu ý
+- Chỉ nhận vỏ thuộc sản phẩm Cocoon.
+- Vỏ có thể mất nắp nhưng phải còn nguyên tem nhãn, không biến dạng và đã được làm sạch.
+- Đóng gói đơn giản, hạn chế dùng túi nilon.
+- Người tham gia trả phí gửi vỏ; Cocoon trả phí gửi sản phẩm mới.
+- Cocoon xử lý và gửi sản phẩm trong vòng 14 ngày kể từ khi nhận vỏ.
+- Quà tặng không quy đổi thành tiền mặt.
+- Hỗ trợ: hotline 1900 9300 hoặc fanpage Cocoon Vietnam.
+
+## 16 sản phẩm có thể chọn
+- Nước tẩy trang bí đao 500ml
+- Gel rửa mặt cà phê Đắk Lắk 310ml
+- Sữa rửa mặt nghệ Hưng Yên 310ml
+- Gel bí đao rửa mặt 310ml
+- Nước sen Hậu Giang 310ml
+- Nước nghệ Hưng Yên 310ml
+- Nước bí đao cân bằng da 310ml
+- Tinh chất xịt dưỡng sen Hậu Giang 100ml
+- Tinh chất hoa hồng 30ml
+- Tinh chất bí đao N7 70ml
+- Xịt khoáng nghệ Hưng Yên 130ml
+- Gel tắm đường thốt nốt An Giang 500ml
+- Gel tắm khuynh diệp và bạc hà 500ml
+- Gel tắm bí đao 310ml
+- Kem ủ tóc bưởi 200ml
+- Tẩy da chết da đầu bồ kết 200ml`},
+    {id:'BV2',title:'Thu hồi vỏ chai, đổi túi xanh năm 2025',cat:'thu_gom',date:'2025-05-10',author:'Cocoon Vietnam',coverText:'Đổi túi xanh 2025',act:'HD8',visible:true,demo:false,
+     srcName:'Bài “Chương trình Thu hồi vỏ chai - Đổi túi xanh năm 2025”, website Cocoon',srcUrl:'https://cocoonvietnam.com/',
+     summary:'Chương trình thu hồi vỏ chai tại điểm trở lại từ ngày 10/5/2025 với 161 Điểm Xanh trên ba miền.',
+     body:`## Tóm tắt
+Từ ngày **10/5/2025**, chương trình “Thu hồi vỏ chai - Đổi túi xanh” trở lại với **161 Điểm Xanh** trải dài ba miền.
+
+Nội dung trên được tóm tắt từ phần giới thiệu của bài viết. Quy tắc quy đổi chi tiết của đợt này cần xem trong bài gốc.`},
+    {id:'BV3',title:'Thu hồi pin cũ, bảo vệ trái đất xanh năm 2025',cat:'pin',date:'2025-01-01',dateText:'Năm 2025',author:'Cocoon Vietnam',coverText:'Thu hồi pin cũ',act:'HD6',visible:true,demo:false,
+     srcName:'Bài “Chương trình Thu hồi pin cũ - Bảo vệ trái đất xanh năm 2025”, website Cocoon',srcUrl:'https://cocoonvietnam.com/',
+     summary:'Lần thứ 4 của chương trình, phối hợp với Trường ĐH Sư phạm TP.HCM, có 103 điểm thu hồi tại 5 tỉnh thành.',
+     body:`## Tóm tắt
+Cocoon và Trường Đại học Sư phạm TP.HCM phát động chương trình “Thu hồi pin cũ - Bảo vệ trái đất xanh” **lần thứ 4** với **103 điểm thu hồi** tại 5 tỉnh thành:
+- Hà Nội
+- TP. Hồ Chí Minh
+- Cần Thơ
+- Đà Nẵng
+- Huế
+
+## Kết quả đã công bố
+Theo báo cáo của nhóm (mục 1.1.3), Cocoon công bố đã thu gom hơn **38,7 tấn pin** đã qua sử dụng sau 5 năm.`},
+    {id:'BV4',title:'Hướng dẫn: theo dõi vỏ chai đã nộp trên cổng thông tin',cat:'huong_dan',date:'2027-05-02',author:'Cổng thông tin thu gom',coverText:'Theo dõi vỏ chai',act:'HD1',visible:true,demo:true,
+     srcName:'',srcUrl:'',
+     summary:'Đăng ký thành viên xanh, đọc số điện thoại khi nộp vỏ và xem hành trình lô đến khi tái chế hoàn tất.',
+     body:`## Ba bước
+1. Tạo tài khoản thành viên xanh bằng email và số điện thoại.
+2. Khi nộp vỏ, đọc số điện thoại cho nhân viên điểm thu. Phiếu BM01 được gắn vào tài khoản và cộng điểm.
+3. Mở Hồ sơ xanh, bấm “Xem hành trình” ở từng lần nộp.
+
+## Năm trạng thái của lô
+- Đã ghi nhận
+- Đã bàn giao
+- Đã đối soát
+- Đã phê duyệt công bố
+- Đã tái chế hoàn tất
+
+Trạng thái cuối chỉ hiển thị khi đơn vị tái chế gửi chứng từ xác nhận. Bàn giao hay đối soát chưa có nghĩa là vỏ chai đã được tái chế xong.`}
+  ];
+  return {points,receipts,lots,users,activities,posts,apps:[],fb,seq:501,appSeq:1,uSeq:3,vSeq:2,aSeq:9,pSeq:5};
+}
+let S, sess={uid:null};
+const okState=x=>x&&['users','points','receipts','lots','activities','posts','apps','fb'].every(k=>Array.isArray(x[k]))&&x.points.every(p=>p.type)&&x.users.some(u=>u.role==='admin');
+function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):seed();if(!okState(S))S=seed()}catch(e){S=seed()}
+  try{const r=localStorage.getItem(SKEY);if(r)sess=JSON.parse(r)}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function saveSess(){try{localStorage.setItem(SKEY,JSON.stringify(sess))}catch(e){}}
+load();
+const me=()=>S.users.find(u=>u.id===sess.uid)||null;
+const pt=id=>S.points.find(p=>p.id===id);
+const lotRec=l=>S.receipts.filter(r=>r.lot===l.id);
+const userByPhone=p=>S.users.find(u=>u.role==='customer'&&u.phone===p);
+const myReceipts=u=>S.receipts.filter(r=>r.phone&&r.phone===u.phone);
+const balance=u=>sum(myReceipts(u),ptsOf)-u.vouchers.length*PT.bag;
+function maxDiff(r){return Math.max(...['large','small','kg'].map(k=>Math.abs(r.ours[k]-r.theirs[k])/r.ours[k]*100))}
+
+/* định tuyến và phân quyền */
+const PUBLIC=['trangchu','hoatdong','baiviet','diemthu','quytac','hanhtrinh','dangkydiem','gopy','dangnhap','dangky'];
+const PRIVATE={hoso:'customer',quanly:'admin'};
+let pending=null, tab='tong', openPost=null;
+function go(h){if(location.hash==='#'+h)route();else location.hash=h}
+function route(){
+  let h=decodeURIComponent(location.hash.slice(1))||'trangchu', code=null;
+  if(/^LO-/i.test(h)){code=h.toUpperCase();h='hanhtrinh'}
+  openPost=null;if(/^bv-/i.test(h)){openPost=h.slice(3).toUpperCase();h='baiviet'}
+  if(!PUBLIC.includes(h)&&!PRIVATE[h])h='trangchu';
+  const u=me(); let view=h;
+  if(PRIVATE[h]){
+    if(!u){pending=h;view='dangnhap';$('#loginNote').textContent='Vui lòng đăng nhập để mở '+(h==='quanly'?'khu vực quản lý.':'Hồ sơ xanh.')}
+    else if(u.role!==PRIVATE[h]){view='khongquyen';$('#denyMsg').textContent=h==='quanly'?'Khu vực quản lý chỉ dành cho nhân viên và quản lý Cocoon.':'Hồ sơ xanh dành cho tài khoản khách hàng. Tài khoản quản lý xem số liệu trong khu vực quản lý.'}
+  }
+  if((h==='dangnhap'||h==='dangky')&&u)view=u.role==='admin'?'quanly':'hoso';
+  document.querySelectorAll('section[data-view]').forEach(s=>s.classList.toggle('on',s.dataset.view===view));
+  try{renderAll()}catch(err){console.error(err);S=seed();save();renderAll()}
+  sheet(false);
+  document.querySelectorAll('nav a').forEach(a=>{if(a.getAttribute('href')==='#'+view)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  if(code){$('#code').value=code;lookup(code)}
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',route);
+
+const IC={user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',chart:'<path d="M4 20V11M10 20V5M16 20v-8M21 20H3"/>',leaf:'<path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15"/><path d="M5 19l8-8"/>'};
+const svgI=d=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const initials=n=>n.trim().split(/\s+/).slice(-1)[0].charAt(0).toUpperCase();
+function renderMobileUI(u){
+  const me_=$('#tbMe');
+  if(!u){me_.href='#dangnhap';me_.innerHTML=svgI(IC.user)+'Đăng nhập'}
+  else if(u.role==='admin'){me_.href='#quanly';me_.innerHTML=svgI(IC.chart)+'Quản lý'}
+  else{me_.href='#hoso';me_.innerHTML=svgI(IC.leaf)+'Hồ sơ xanh'}
+  const ma=$('#mAcct');
+  if(u){ma.href=u.role==='admin'?'#quanly':'#hoso';ma.innerHTML=`<span class="badge ${u.role==='admin'?'admin':''}">${u.role==='admin'?'Quản lý':'Thành viên'}</span><span class="avatar" aria-label="${esc(u.name)}">${esc(initials(u.name))}</span>`}
+  else{ma.href='#dangky';ma.innerHTML='<span class="btn sm">Đăng ký</span>'}
+  $('#sheetBody').innerHTML=`<div class="grip"></div>
+    ${u?`<div class="who-m"><span class="avatar">${esc(initials(u.name))}</span><div><b>${esc(u.name)}</b><div class="small muted">${u.role==='admin'?'Quản lý Cocoon':'Thành viên xanh'}</div></div></div>`:''}
+    <h3>Thông tin chiến dịch</h3>
+    <a href="#baiviet">Bài viết</a><a href="#quytac">Quy tắc và tích điểm</a><a href="#hanhtrinh">Hành trình vỏ chai</a><a href="#dangkydiem">Đăng ký làm điểm thu</a><a href="#gopy">Góp ý, đánh giá</a>
+    <h3>Tài khoản</h3>
+    ${u?`<a href="${u.role==='admin'?'#quanly':'#hoso'}">${u.role==='admin'?'Khu vực quản lý':'Hồ sơ xanh'}</a><button class="item" data-logout>Đăng xuất</button>`
+       :`<a href="#dangnhap">Đăng nhập</a><a href="#dangky">Đăng ký thành viên xanh</a>`}`;
+}
+function sheet(open){$('#sheet').classList.toggle('on',open);$('#tbMore').setAttribute('aria-expanded',open)}
+$('#tbMore').addEventListener('click',()=>sheet(!$('#sheet').classList.contains('on')));
+$('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet'||e.target.closest('a,[data-logout]'))sheet(false)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')sheet(false)});
+function labelTables(){document.querySelectorAll('table.stack').forEach(t=>{const hs=[...t.querySelectorAll('thead th')].map(th=>th.textContent.trim());
+  t.querySelectorAll('tbody tr,tfoot tr').forEach(tr=>{let i=0;[...tr.children].forEach(td=>{const span=+td.getAttribute('colspan')||1;td.dataset.label=span>1?'':(hs[i]||'');i+=span})})})}
+function renderAuthUI(){
+  const u=me();renderMobileUI(u);
+  document.querySelectorAll('nav a[data-need]').forEach(a=>a.classList.toggle('hide',!u||u.role!==a.dataset.need));
+  $('#acct').innerHTML=u
+    ?`<div class="who"><b>${esc(u.name)}</b><span class="badge ${u.role==='admin'?'admin':''}">${u.role==='admin'?'Quản lý':'Thành viên xanh'}</span></div><button class="btn ghost sm" data-logout>Đăng xuất</button>`
+    :`<a class="btn ghost sm" href="#dangnhap">Đăng nhập</a><a class="btn sm" href="#dangky">Đăng ký</a>`;
+  const j=$('#heroJoin');
+  if(u&&u.role==='customer'){j.textContent='Xem điểm của tôi';j.href='#hoso'}
+  else if(u&&u.role==='admin'){j.textContent='Mở khu vực quản lý';j.href='#quanly'}
+  else{j.textContent='Tạo tài khoản tích điểm';j.href='#dangky'}
+}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-logout]');if(!b)return;
+  sess={uid:null};saveSess();pending=null;toast('Đã đăng xuất.');go('trangchu')});
+
+/* đăng nhập */
+$('#loginForm').addEventListener('submit',e=>{
+  e.preventDefault();const f=e.target;const email=f.email.value.trim().toLowerCase();
+  const u=S.users.find(x=>x.email===email);
+  if(!email||!f.pass.value){$('#loginErr').textContent='Nhập email và mật khẩu.';return}
+  if(!u||u.pass!==pwh(email,f.pass.value)){$('#loginErr').textContent='Email hoặc mật khẩu chưa đúng.';return}
+  $('#loginErr').textContent='';f.reset();sess={uid:u.id};saveSess();tab='tong';
+  toast(`Đã đăng nhập: ${u.name}.`);
+  const target=pending&&PRIVATE[pending]===u.role?pending:(u.role==='admin'?'quanly':'hoso');pending=null;
+  $('#loginNote').textContent='Khách hàng xem hồ sơ và điểm tích lũy. Nhân viên, quản lý Cocoon vào khu vực quản lý.';
+  go(target);
+});
+document.querySelectorAll('[data-demo]').forEach(b=>b.addEventListener('click',()=>{
+  const f=$('#loginForm');const a=b.dataset.demo==='a';
+  f.email.value=a?'admin@cocoon.demo':'khachhang@demo.vn';f.pass.value=a?'admin123':'123456';f.pass.focus()}));
+
+/* đăng ký */
+$('#regForm').addEventListener('submit',e=>{
+  e.preventDefault();const f=e.target;const err=$('#regErr');
+  const name=f.name.value.trim(), email=f.email.value.trim().toLowerCase(), phone=f.phone.value.replace(/\s/g,'');
+  if(!name)return err.textContent='Nhập họ và tên.';
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return err.textContent='Email chưa đúng định dạng.';
+  if(S.users.some(u=>u.email===email))return err.textContent='Email này đã có tài khoản. Hãy đăng nhập.';
+  if(!/^0\d{9}$/.test(phone))return err.textContent='Số điện thoại gồm 10 chữ số, bắt đầu bằng 0.';
+  if(S.users.some(u=>u.phone===phone))return err.textContent='Số điện thoại này đã gắn với một tài khoản khác.';
+  if(f.pass.value.length<6)return err.textContent='Mật khẩu cần ít nhất 6 ký tự.';
+  if(f.pass.value!==f.pass2.value)return err.textContent='Hai mật khẩu chưa khớp.';
+  if(!f.consent.checked)return err.textContent='Cần đồng ý cho phép dùng thông tin để ghi nhận đóng góp.';
+  err.textContent='';
+  const u={id:'U'+(S.uSeq++),name,email,phone,pass:pwh(email,f.pass.value),role:'customer',created:TODAY,vouchers:[]};
+  S.users.push(u);save();f.reset();sess={uid:u.id};saveSess();
+  toast('Đã tạo tài khoản. Đọc số điện thoại khi nộp vỏ để được cộng điểm.');go('hoso');
+});
+
+/* trang chủ */
+function renderHome(){
+  $('#campName').textContent=CAMP.name;
+  $('#campDates').textContent=`${fmtD(CAMP.start)} đến ${fmtD(CAMP.end)}`;
+  $('#daysLeft').textContent=Math.max(0,Math.round((new Date(CAMP.end)-new Date(TODAY))/864e5));
+  const pub=S.receipts.filter(r=>{const l=S.lots.find(x=>x.id===r.lot);return l&&IDX[l.status]>=IDX.phe_duyet});
+  const stats=[
+    [nf(sum(pub,r=>r.large+r.small)),'vỏ đã đối soát và công bố'],
+    [S.points.filter(p=>p.status==='open').length,'điểm thu đang nhận vỏ'],
+    [S.lots.filter(l=>l.status==='tai_che').length,'lô đã tái chế hoàn tất'],
+    [S.users.filter(u=>u.role==='customer').length,'thành viên xanh']
+  ];
+  $('#homeStats').innerHTML=stats.map(([a,b])=>`<div class="stat"><strong>${a}</strong><span>${b}</span></div>`).join('');
+  if(!$('#heroArt').innerHTML){
+    const pick=[[0,190],[4,220],[3,130],[1,175],[2,150]];
+    $('#heroArt').innerHTML=pick.map(([i,h])=>bottle(PRODUCTS[i].shape,PRODUCTS[i].c,h)).join('');
+    document.querySelectorAll('[data-shelf]').forEach(el=>el.innerHTML=[[5,130],[6,90],[0,120],[7,80]].map(([i,h])=>bottle(PRODUCTS[i].shape,PRODUCTS[i].c,h)).join(''));
+    $('#prodGrid').innerHTML=PRODUCTS.map(p=>`<figure class="prod"><div class="ph" style="background:color-mix(in srgb,${p.c} 22%,var(--surface))">${prodImg(p)}</div><figcaption><b>${esc(p.n)}</b><span>${esc(p.g)}</span></figcaption></figure>`).join('');
+  }
+}
+
+/* điểm thu */
+let cityF=null, statusF='all', typeF='all';
+$('#typeFilters').innerHTML=[['all','Mọi loại điểm'],...Object.entries(TYPES)].map(([k,v])=>`<button data-t="${k}" aria-pressed="${k==='all'}">${v}</button>`).join('');
+function renderPoints(){
+  const svg=$('#schema');
+  let s=`<path d="M100 40 C 70 110, 120 150, 110 200 S 70 300, 100 345 S 80 390, 75 395" fill="none" stroke="var(--line)" stroke-width="6" stroke-linecap="round"/>`;
+  CITIES.forEach(c=>{
+    const n=S.points.filter(p=>p.city===c.c&&p.status==='open').length;const left=c.c==='Cần Thơ';
+    s+=`<g class="node${cityF===c.c?' sel':''}" data-city="${c.c}" tabindex="0" role="button" aria-pressed="${cityF===c.c}" aria-label="${c.c}, ${n} điểm đang nhận"><circle cx="${c.x}" cy="${c.y}" r="9"/><text x="${c.x+(left?-16:18)}" y="${c.y+5}" text-anchor="${left?'end':'start'}">${c.c} (${n})</text></g>`;
+  });
+  svg.innerHTML=s;
+  svg.querySelectorAll('.node').forEach(g=>{const f=()=>{cityF=cityF===g.dataset.city?null:g.dataset.city;renderPoints()};
+    g.addEventListener('click',f);g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();f()}})});
+  const list=S.points.filter(p=>(!cityF||p.city===cityF)&&(statusF==='all'||p.status==='open')&&(typeF==='all'||p.type===typeF));
+  $('#plist').innerHTML=(cityF?`<p class="small" style="margin:0">Đang lọc: <b>${cityF}</b>. <button class="linkbtn" id="clearCity">Bỏ lọc thành phố</button></p>`:'')+
+    (list.length?list.map(p=>`<div class="prow"><div><b>${esc(p.name)}</b><div class="meta">${esc(TYPES[p.type]||'')}, ${esc(p.district)}, ${esc(p.city)}. Giờ nhận ${esc(p.hours)}</div></div><span class="pill ${p.status}">${STATUS_TXT[p.status]}</span></div>`).join('')
+    :`<div class="empty">Chưa có điểm thu phù hợp bộ lọc. <a href="#dangkydiem">Đăng ký làm điểm thu</a> nếu đơn vị bạn muốn tham gia.</div>`);
+  const c=$('#clearCity');if(c)c.addEventListener('click',()=>{cityF=null;renderPoints()});
+}
+document.querySelectorAll('#statusFilters button').forEach(b=>b.addEventListener('click',()=>{statusF=b.dataset.f;document.querySelectorAll('#statusFilters button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderPoints()}));
+document.querySelectorAll('#typeFilters button').forEach(b=>b.addEventListener('click',()=>{typeF=b.dataset.t;document.querySelectorAll('#typeFilters button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderPoints()}));
+
+/* quy tắc */
+function ruleCalc(){const l=+$('#rcL').value||0,s=+$('#rcS').value||0;const p=l*PT.large+s*PT.small;
+  $('#ruleCalc').innerHTML=`Không tài khoản: <b>${gifts(l,s)} túi vải</b> trao tại quầy.<br>Thành viên xanh: <b>${nf(p)} điểm</b>, đủ đổi ${Math.floor(p/PT.bag)} túi vải${p%PT.bag?`, dư ${p%PT.bag} điểm cho lần sau`:''}.`}
+['#rcL','#rcS'].forEach(i=>$(i).addEventListener('input',ruleCalc));
+
+/* hành trình lô */
+function journeyHTML(lot){
+  const cur=IDX[lot.status], rs=lotRec(lot);const L=sum(rs,r=>r.large),Sm=sum(rs,r=>r.small);
+  const ev=[`<b>${rs.length} phiếu BM01</b>, ${nf(L)} vỏ lớn và ${nf(Sm)} vỏ nhỏ hợp lệ`,
+    lot.handover?`Bàn giao ngày <b>${fmtD(lot.handover)}</b>`:'',
+    lot.recon?`Đối chiếu với ${esc(lot.recon.partner)} ngày <b>${fmtD(lot.recon.date)}</b>; chênh lệch lớn nhất ${pct(maxDiff(lot.recon))}%`:'',
+    lot.approve?`Duyệt công bố ngày <b>${fmtD(lot.approve.date)}</b>`:'',
+    lot.recycle?`Chứng từ <b>${esc(lot.recycle.doc)}</b>, ngày ${fmtD(lot.recycle.date)}`:''];
+  const li=STEPS.map((s,i)=>{const done=i<=cur, warn=lot.recheck&&i===IDX.doi_soat;
+    const cls=[done?'done':'',i===cur?'current':'',warn?'warn':''].join(' ');
+    const t=done?ev[i]:(warn?'Số liệu hai bên chênh lệch vượt ngưỡng, đang kiểm tra lại.':'Chưa có chứng từ cho bước này.');
+    return `<li class="${cls}"><span class="dot">${done?'✓':i+1}</span><h3>${s.t}</h3><div class="small">${s.d}</div><div class="evidence">${t}</div></li>`}).join('');
+  return `<ol class="journey">${li}</ol>${cur<IDX.tai_che?`<div class="notice">Bàn giao và đối soát chưa có nghĩa là vỏ chai đã tái chế xong. Trạng thái cuối chỉ cập nhật khi đơn vị tái chế gửi chứng từ xác nhận.</div>`:''}`;
+}
+function lookup(raw){
+  const code=raw.trim().toUpperCase(), out=$('#result'), lot=S.lots.find(l=>l.id===code);
+  if(!lot){out.innerHTML=`<div class="empty" style="margin-top:24px"><h3>Không tìm thấy mã lô “${esc(code)}”</h3><p class="small" style="margin:0">Mã lô có dạng LO-2027-05-C01-01. Thành viên xanh xem lô của mình trong <a href="#hoso">Hồ sơ xanh</a> mà không cần nhập mã. Vẫn không thấy? <a href="#gopy">Gửi phản hồi</a>.</p></div>`;return}
+  const p=pt(lot.point);
+  out.innerHTML=`<div class="result-head"><h2>${STEPS[IDX[lot.status]].t}</h2><span class="muted">Lô ${lot.id}</span></div>
+    <div class="facts"><div><span>Điểm thu</span><b>${esc(p.name)}, ${esc(p.city)}</b></div><div><span>Số phiếu trong lô</span><b>${lotRec(lot).length}</b></div></div>${journeyHTML(lot)}`;
+}
+function renderTries(){$('#tries').innerHTML='Thử mã mẫu: '+S.lots.slice(0,3).map(l=>`<button class="chip" data-try="${l.id}">${l.id}</button>`).join('');
+  document.querySelectorAll('[data-try]').forEach(b=>b.addEventListener('click',()=>{$('#code').value=b.dataset.try;lookup(b.dataset.try)}))}
+$('#lookupForm').addEventListener('submit',e=>{e.preventDefault();lookup($('#code').value)});
+
+/* đăng ký điểm thu, góp ý */
+$('#appCity').innerHTML=CITIES.map(c=>`<option>${c.c}</option>`).join('');
+$('#appType').innerHTML=Object.entries(TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+$('#appForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);
+  const id='DK-2027-'+String(S.appSeq++).padStart(3,'0');
+  S.apps.push({id,org:f.get('org'),city:f.get('city'),district:f.get('district'),type:f.get('type'),hours:f.get('hours'),contact:f.get('contact')});
+  save();e.target.reset();toast(`Đã gửi đơn ${id}. Bộ phận vận hành phản hồi trong 1 ngày làm việc.`)});
+const QS=['Mức độ hài lòng chung với hoạt động thu gom','Thông tin điểm thu và quy tắc quy đổi rõ ràng','Dễ theo dõi trạng thái vỏ chai đã nộp','Tin rằng vỏ chai được xử lý đúng cam kết'];
+$('#fbScales').innerHTML=QS.map((q,i)=>`<fieldset style="margin-bottom:12px"><legend>${i+1}. ${q}</legend><div class="scale">${[1,2,3,4,5].map(v=>`<label><input type="radio" name="q${i+1}" value="${v}" ${i===0?'required':''}><span>${v}</span></label>`).join('')}</div></fieldset>`).join('')+`<p class="small muted" style="margin:0">1 = Rất không hài lòng, 5 = Rất hài lòng</p>`;
+$('#fbForm').addEventListener('submit',e=>{e.preventDefault();const f=new FormData(e.target);
+  S.fb.push({q1:+f.get('q1'),q2:+f.get('q2')||null,q3:+f.get('q3')||null,q4:+f.get('q4')||null,resp:f.get('resp'),note:f.get('note')});
+  save();e.target.reset();toast('Đã gửi đánh giá. Cảm ơn bạn đã góp ý.')});
+
+/* hồ sơ khách hàng */
+function renderProfile(){
+  const u=me();if(!u||u.role!=='customer')return;
+  const rs=myReceipts(u).sort((a,b)=>b.date.localeCompare(a.date));const bal=balance(u);
+  $('#pfHello').textContent='Xin chào, '+u.name;
+  $('#pfSub').textContent=`${u.email}, SĐT ${mask(u.phone)}. Thành viên từ ${fmtD(u.created)}.`;
+  const need=PT.bag-bal%PT.bag;
+  $('#pfPoints').innerHTML=`<div class="small" style="font-weight:700;color:var(--sprout)">Điểm tích lũy hiện có</div>
+    <div><span class="big">${nf(bal)}</span> <span class="unit">điểm</span></div>
+    <div class="progress" aria-hidden="true"><i style="width:${Math.min(100,bal%PT.bag)}%"></i></div>
+    <p class="small">${bal>=PT.bag?`Đủ đổi ${Math.floor(bal/PT.bag)} túi vải.`:`Còn ${need} điểm nữa để đổi 1 túi vải.`} Đã đổi ${u.vouchers.length} lần.</p>
+    <button class="btn light" id="redeem" ${bal<PT.bag?'disabled':''}>Đổi 1 túi vải (100 điểm)</button>`;
+  const recycled=rs.filter(r=>{const l=S.lots.find(x=>x.id===r.lot);return l&&l.status==='tai_che'});
+  $('#pfStats').innerHTML=[[rs.length,'lần nộp vỏ'],[nf(sum(rs,r=>r.large+r.small)),'vỏ hợp lệ đã nộp'],[nf(sum(recycled,r=>r.large+r.small)),'vỏ đã tái chế hoàn tất'],[new Set(rs.map(r=>r.point)).size,'điểm thu đã ghé']]
+    .map(([a,b])=>`<div><strong>${a}</strong><span>${b}</span></div>`).join('');
+  $('#pfHist').innerHTML=rs.length?rs.map(r=>{const l=S.lots.find(x=>x.id===r.lot), p=pt(r.point);
+    return `<div class="hrow"><div class="hrow-top"><b>${fmtD(r.date)}, ${esc(p.name)} (${esc(p.city)})</b><span class="st ${l.recheck?'warn':(l.status==='tai_che'?'':'mute')}">${l.recheck?'Đang kiểm tra lại':STEPS[IDX[l.status]].t}</span></div>
+      <div class="small muted">${r.large} vỏ lớn, ${r.small} vỏ nhỏ hợp lệ. +${ptsOf(r)} điểm. Phiếu ${r.id}, lô ${l.id}.</div>
+      <button class="linkbtn" data-j="${r.id}" aria-expanded="false">Xem hành trình</button><div class="jbox hide" id="j-${r.id}"></div></div>`}).join('')
+    :`<div class="empty">Chưa có lần nộp nào gắn với số ${mask(u.phone)}. Khi nộp vỏ, đọc số điện thoại này cho nhân viên điểm thu. <a href="#diemthu">Tìm điểm thu</a></div>`;
+  document.querySelectorAll('[data-j]').forEach(b=>b.addEventListener('click',()=>{const r=S.receipts.find(x=>x.id===b.dataset.j);const box=$('#j-'+r.id);
+    const open=box.classList.toggle('hide')===false;if(open)box.innerHTML=journeyHTML(S.lots.find(x=>x.id===r.lot));b.setAttribute('aria-expanded',open);b.textContent=open?'Ẩn hành trình':'Xem hành trình'}));
+  $('#pfVouch').innerHTML=u.vouchers.length?`<div class="tablewrap"><table class="stack"><thead><tr><th>Mã phiếu</th><th>Ngày tạo</th><th>Trạng thái</th></tr></thead><tbody>${[...u.vouchers].reverse().map(v=>`<tr><td><b>${v.code}</b></td><td>${fmtD(v.date)}</td><td>${v.used?'Đã nhận quà':'Chưa dùng, đưa mã cho điểm thu'}</td></tr>`).join('')}</tbody></table></div>`:`<p class="small muted">Chưa có phiếu. Đủ 100 điểm bạn có thể đổi 1 túi vải.</p>`;
+  const f=$('#pfForm');if(document.activeElement.form!==f){f.name.value=u.name;f.phone.value=u.phone}
+  $('#redeem').addEventListener('click',()=>{if(balance(u)<PT.bag)return;const code='TV-2027-'+String(S.vSeq++).padStart(4,'0');
+    u.vouchers.push({code,date:TODAY,used:false});save();renderProfile();labelTables();toast(`Đã tạo phiếu ${code}. Đưa mã này cho nhân viên điểm thu để nhận túi vải.`)});
+}
+$('#pfForm').addEventListener('submit',e=>{e.preventDefault();const u=me();const f=e.target;const phone=f.phone.value.replace(/\s/g,'');
+  if(!f.name.value.trim())return $('#pfErr').textContent='Nhập họ và tên.';
+  if(!/^0\d{9}$/.test(phone))return $('#pfErr').textContent='Số điện thoại gồm 10 chữ số, bắt đầu bằng 0.';
+  if(S.users.some(x=>x!==u&&x.phone===phone))return $('#pfErr').textContent='Số điện thoại này đã gắn với tài khoản khác.';
+  $('#pfErr').textContent='';
+  if(phone!==u.phone)S.receipts.forEach(r=>{if(r.phone===u.phone)r.phone=phone});
+  u.name=f.name.value.trim();u.phone=phone;save();renderAll();toast('Đã lưu thông tin tài khoản.')});
+$('#delAcc').addEventListener('click',()=>{const u=me();if(!u)return;
+  if(!confirm('Xóa tài khoản? Lịch sử đóng góp sẽ được ẩn danh và điểm còn lại không thể khôi phục.'))return;
+  S.receipts.forEach(r=>{if(r.phone===u.phone)r.phone=null});S.users=S.users.filter(x=>x!==u);save();sess={uid:null};saveSess();toast('Đã xóa tài khoản và ẩn danh lịch sử đóng góp.');go('trangchu')});
+
+/* khu vực quản lý */
+document.querySelectorAll('#admTabs button').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab;renderAdmin()}));
+$('#fCity').innerHTML=`<option value="all">Toàn quốc</option>`+CITIES.map(c=>`<option>${c.c}</option>`).join('');
+['#fPeriod','#fCity'].forEach(i=>$(i).addEventListener('change',()=>{renderDash();labelTables()}));
+$('#resetBtn').addEventListener('click',()=>{const uid=sess.uid;S=seed();save();if(!S.users.some(u=>u.id===uid)){sess={uid:null};saveSess()}renderAll();toast('Đã khôi phục dữ liệu mẫu.')});
+
+function filtered(){const per=$('#fPeriod').value, city=$('#fCity').value;
+  return {per,city,rf:S.receipts.filter(r=>(per==='all'||r.date.startsWith(per))&&(city==='all'||pt(r.point).city===city))}}
+function bars(el,rows){const mx=Math.max(1,...rows.map(x=>x[1]));
+  $(el).innerHTML=rows.map(([t,v])=>`<div class="bar-row"><span>${t}</span><div class="bar-track"><div class="bar-fill" style="width:${v/mx*100}%"></div></div><span class="v">${nf(v)}</span></div>`).join('')}
+function pointRows(rf,city){return S.points.filter(p=>city==='all'||p.city===city).map(p=>{const r=rf.filter(x=>x.point===p.id);
+  return {p,n:r.length,L:sum(r,x=>x.large),Sm:sum(r,x=>x.small),inv:sum(r,x=>x.invalid)}})}
+function renderDash(){
+  const {per,city,rf}=filtered();
+  const valid=sum(rf,r=>r.large+r.small), inv=sum(rf,r=>r.invalid);
+  const lf=S.lots.filter(l=>city==='all'||pt(l.point).city===city);
+  const done=lf.filter(l=>l.status==='tai_che'), withDoc=done.filter(l=>l.recycle&&l.recycle.doc&&l.recon);
+  const linked=rf.filter(r=>r.phone);
+  const csat=S.fb.length?Math.round(S.fb.filter(f=>f.q1>=4).length/S.fb.length*100):0;
+  $('#kpis').innerHTML=[
+    ['Vỏ hợp lệ đã thu',nf(valid),`${valid+inv?pct(inv/(valid+inv)*100):'0'}% vỏ bị từ chối`,''],
+    ['Phiếu BM01',nf(rf.length),`${new Set(rf.map(r=>r.lot)).size} lô`,''],
+    ['Lượt nộp của thành viên',nf(linked.length),`${nf(sum(linked,ptsOf))} điểm đã cộng`,''],
+    ['Lô hoàn tất có đủ chứng từ',done.length?Math.round(withDoc.length/done.length*100)+'%':'Chưa có','Mục tiêu 100%',done.length?(withDoc.length===done.length?'ok':'bad'):''],
+    ['CSAT (câu 1, mức 4–5)',csat+'%',`Mục tiêu ≥ 85%, ${S.fb.length} phản hồi`,csat>=85?'ok':'bad'],
+    ['Lô chờ duyệt công bố',lf.filter(l=>l.status==='doi_soat').length,'Công bố ≤ 5 ngày làm việc sau đối soát','']
+  ].map(([a,b,c,d])=>`<div class="kpi"><span>${a}</span><strong>${b}</strong><em class="${d}">${c}</em></div>`).join('');
+  bars('#byCity',CITIES.map(c=>[c.c,sum(S.receipts.filter(r=>(per==='all'||r.date.startsWith(per))&&pt(r.point).city===c.c),r=>r.large+r.small)]));
+  bars('#byMonth',MONTHS.map(([k,t])=>[t,sum(S.receipts.filter(r=>r.date.startsWith(k)&&(city==='all'||pt(r.point).city===city)),r=>r.large+r.small)]));
+  bars('#byStatus',STEPS.map(s=>[s.t,lf.filter(l=>l.status===s.k).length]));
+  const rows=pointRows(rf,city);
+  $('#pointTbl').innerHTML=`<thead><tr><th>Điểm thu</th><th>Khu vực</th><th>Loại</th><th>Trạng thái</th><th class="num">Phiếu</th><th class="num">Vỏ lớn</th><th class="num">Vỏ nhỏ</th><th class="num">Hợp lệ</th><th class="num">Không hợp lệ</th></tr></thead>
+   <tbody>${rows.map(x=>`<tr><td><b>${esc(x.p.name)}</b></td><td>${esc(x.p.city)}</td><td>${esc(TYPES[x.p.type]||'')}</td><td><select data-ps="${x.p.id}" aria-label="Trạng thái ${esc(x.p.name)}">${Object.entries(STATUS_TXT).map(([k,v])=>`<option value="${k}" ${k===x.p.status?'selected':''}>${v}</option>`).join('')}</select></td><td class="num">${x.n}</td><td class="num">${nf(x.L)}</td><td class="num">${nf(x.Sm)}</td><td class="num">${nf(x.L+x.Sm)}</td><td class="num">${nf(x.inv)}</td></tr>`).join('')}</tbody>
+   <tfoot><tr><td colspan="4">Tổng</td><td class="num">${sum(rows,x=>x.n)}</td><td class="num">${nf(sum(rows,x=>x.L))}</td><td class="num">${nf(sum(rows,x=>x.Sm))}</td><td class="num">${nf(sum(rows,x=>x.L+x.Sm))}</td><td class="num">${nf(sum(rows,x=>x.inv))}</td></tr></tfoot>`;
+  document.querySelectorAll('[data-ps]').forEach(s=>s.addEventListener('change',()=>{pt(s.dataset.ps).status=s.value;save();renderPoints();renderHome();toast(`Đã cập nhật trạng thái ${pt(s.dataset.ps).name}: ${STATUS_TXT[s.value]}.`)}));
+}
+$('#csvBtn').addEventListener('click',()=>{const {per,city,rf}=filtered();const rows=pointRows(rf,city);
+  const q=v=>`"${String(v).replace(/"/g,'""')}"`;
+  const csv=[['Mã','Điểm thu','Khu vực','Loại','Trạng thái','Phiếu','Vỏ lớn','Vỏ nhỏ','Hợp lệ','Không hợp lệ'].map(q).join(','),
+    ...rows.map(x=>[x.p.id,x.p.name,x.p.city,TYPES[x.p.type]||'',STATUS_TXT[x.p.status],x.n,x.L,x.Sm,x.L+x.Sm,x.inv].map(q).join(','))].join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`thu-gom-theo-diem_${per}_${city==='all'?'toan-quoc':city}.csv`;document.body.appendChild(a);a.click();a.remove();toast('Đã tải bảng CSV.')});
+
+function renderBM01(){
+  const sel=$('#bmPoint');const cur=sel.value||'A01';
+  sel.innerHTML=S.points.map(p=>`<option value="${p.id}" ${p.id===cur?'selected':''}>${esc(p.name)}, ${esc(p.city)}</option>`).join('');
+  bmCalc();
+  const rs=S.receipts.filter(r=>r.point===sel.value).slice(-6).reverse();
+  $('#recentTbl').innerHTML=`<thead><tr><th>Mã phiếu</th><th>Ngày</th><th class="num">Lớn</th><th class="num">Nhỏ</th><th>Thành viên</th></tr></thead><tbody>${rs.length?rs.map(r=>{const u=r.phone&&userByPhone(r.phone);return `<tr><td>${r.id}</td><td>${fmtD(r.date)}</td><td class="num">${r.large}</td><td class="num">${r.small}</td><td>${u?esc(u.name)+` (+${ptsOf(r)})`:'<span class="muted">Khách lẻ</span>'}</td></tr>`}).join(''):'<tr><td colspan="5" class="muted">Chưa có phiếu tại điểm này.</td></tr>'}</tbody>`;
+}
+function bmCalc(){const f=$('#bm01');const l=+f.large.value||0,s=+f.small.value||0,inv=+f.invalid.value||0;const ph=f.phone.value.replace(/\s/g,'');const u=ph&&userByPhone(ph);
+  $('#bmCalc').innerHTML=`Tổng nhận ${l+s+inv} vỏ, hợp lệ ${l+s}. `+(u?`Cộng <b>${l*PT.large+s*PT.small} điểm</b> cho ${esc(u.name)}.`:(ph?`<b>Số này chưa có tài khoản</b>, trao ${gifts(l,s)} túi vải trực tiếp.`:`Khách lẻ: trao <b>${gifts(l,s)} túi vải</b> trực tiếp.`))}
+$('#bmPoint').addEventListener('change',()=>{renderBM01();labelTables()});
+['large','small','invalid','phone'].forEach(n=>$('#bm01')[n].addEventListener('input',bmCalc));
+$('#bm01').addEventListener('submit',e=>{
+  e.preventDefault();const f=e.target;const point=f.point.value;
+  const l=+f.large.value||0,s=+f.small.value||0,inv=+f.invalid.value||0;const ph=f.phone.value.replace(/\s/g,'');const u=ph&&userByPhone(ph);
+  if(l+s===0){toast('Phiếu cần ít nhất 1 vỏ hợp lệ.');return}
+  if(pt(point).status==='paused'){toast('Điểm thu đang tạm ngưng, chưa thể lập phiếu.');return}
+  let lot=S.lots.find(x=>x.point===point&&x.status==='ghi_nhan');
+  if(!lot){const n=S.lots.filter(x=>x.point===point).length+1;lot={id:`LO-2027-06-${point}-${String(n).padStart(2,'0')}`,point,status:'ghi_nhan'};S.lots.push(lot)}
+  const id='PH-2027-'+String(S.seq++).padStart(4,'0');
+  S.receipts.push({id,point,lot:lot.id,date:TODAY+'T10:00',large:l,small:s,invalid:inv,phone:u?u.phone:null});
+  save();f.large.value=0;f.small.value=0;f.invalid.value=0;f.phone.value='';renderAll();
+  toast(u?`Đã lưu ${id} vào lô ${lot.id}. ${u.name} được cộng ${l*PT.large+s*PT.small} điểm.`:`Đã lưu ${id} vào lô ${lot.id}. Trao ${gifts(l,s)} túi vải cho khách.`);
+});
+$('#vForm').addEventListener('submit',e=>{e.preventDefault();const code=$('#vCode').value.trim().toUpperCase();
+  for(const u of S.users){const v=u.vouchers.find(x=>x.code===code);if(v){
+    if(v.used){toast(`Phiếu ${code} đã được dùng trước đó.`)}else{v.used=true;save();renderAll();toast(`Phiếu hợp lệ. Trao 1 túi vải cho ${u.name}.`)}
+    $('#vCode').value='';return}}
+  toast(`Không tìm thấy phiếu ${code}. Kiểm tra lại mã trên Hồ sơ xanh của khách.`)});
+
+function renderLots(){
+  const lots=[...S.lots].sort((a,b)=>IDX[a.status]-IDX[b.status]);
+  $('#lots').innerHTML=lots.map(l=>{
+    const p=pt(l.point), rs=lotRec(l), L=sum(rs,r=>r.large), Sm=sum(rs,r=>r.small);let act='';
+    if(l.status==='ghi_nhan')act=`<button class="btn sm" data-act="handover" data-id="${l.id}">Bàn giao lô</button>`;
+    if(l.status==='ban_giao')act=`<button class="btn sm" data-act="openrecon" data-id="${l.id}">Nhập đối soát BM02</button>
+      <form class="recon hide" data-recon="${l.id}">
+        <div class="small">Số liệu Cocoon (tổng BM01): <b>${L} vỏ lớn, ${Sm} vỏ nhỏ</b>. Nhập số liệu đơn vị tái chế xác nhận:</div>
+        <div class="row3">
+          <label class="fl">Vỏ lớn<input type="number" name="tl" min="0" value="${L}" required></label>
+          <label class="fl">Vỏ nhỏ<input type="number" name="ts" min="0" value="${Sm}" required></label>
+          <label class="fl">Khối lượng (kg)<input type="number" step="0.1" name="tk" min="0" value="${(L*0.08+Sm*0.02).toFixed(1)}" required></label>
+        </div>
+        <label class="fl">Khối lượng Cocoon cân (kg)<input type="number" step="0.1" name="ok" min="0.1" value="${(L*0.08+Sm*0.02).toFixed(1)}" required></label>
+        <div><button class="btn sm" type="submit">Lưu BM02</button></div>
+      </form>`;
+    if(l.status==='doi_soat')act=`<button class="btn sm" data-act="approve" data-id="${l.id}">Duyệt công bố</button>`;
+    if(l.status==='phe_duyet')act=`<form class="actions" data-doc="${l.id}" style="margin:0"><input name="doc" class="inline-in" placeholder="Số chứng từ xác nhận tái chế" required aria-label="Số chứng từ"><button class="btn sm" type="submit">Ghi nhận hoàn tất</button></form>`;
+    const recon=l.recon?`, BM02 chênh ${pct(maxDiff(l.recon))}%`:'';
+    return `<div class="lot"><div class="lot-top"><b><a href="#${l.id}">${l.id}</a></b><span class="st ${l.recheck?'warn':''}">${l.recheck?'Cần kiểm tra lại':STEPS[IDX[l.status]].t}</span></div>
+      <div class="small muted">${esc(p.name)}, ${esc(p.city)}: ${rs.length} phiếu, ${L} lớn, ${Sm} nhỏ${recon}</div>${act?`<div class="actions">${act}</div>`:''}</div>`}).join('');
+  $('#lots').querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>{const l=S.lots.find(x=>x.id===b.dataset.id);
+    if(b.dataset.act==='handover'){l.status='ban_giao';l.handover=TODAY;save();renderAll();toast(`Đã bàn giao ${l.id}.`)}
+    if(b.dataset.act==='openrecon')$(`[data-recon="${l.id}"]`).classList.toggle('hide');
+    if(b.dataset.act==='approve'){l.status='phe_duyet';l.approve={date:TODAY};save();renderAll();toast(`Đã duyệt công bố ${l.id}.`)}}));
+  $('#lots').querySelectorAll('[data-recon]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const l=S.lots.find(x=>x.id===f.dataset.recon);const rs=lotRec(l);
+    l.recon={date:TODAY,partner:'Duy Tân Recycling',ours:{large:Math.max(1,sum(rs,r=>r.large)),small:Math.max(1,sum(rs,r=>r.small)),kg:+f.ok.value},theirs:{large:+f.tl.value,small:+f.ts.value,kg:+f.tk.value}};
+    const d=maxDiff(l.recon);
+    if(d<=5){l.status='doi_soat';l.recheck=false;toast(`Chênh lệch ${pct(d)}% trong ngưỡng. Lô chuyển sang Đã đối soát.`)}
+    else{l.recheck=true;toast(`Chênh lệch ${pct(d)}% vượt ngưỡng 5%. Kiểm tra lại số liệu hai bên.`)}
+    save();renderAll()}));
+  $('#lots').querySelectorAll('[data-doc]').forEach(f=>f.addEventListener('submit',e=>{e.preventDefault();const l=S.lots.find(x=>x.id===f.dataset.doc);
+    l.recycle={doc:f.doc.value.trim(),date:TODAY};l.status='tai_che';save();renderAll();toast(`Đã ghi nhận chứng từ. ${l.id} hiển thị “Đã tái chế hoàn tất”.`)}));
+}
+function renderApps(){
+  $('#apps').innerHTML=S.apps.length?S.apps.map(a=>`<div class="lot"><div class="lot-top"><b>${a.id}: ${esc(a.org)}</b><span class="st warn">Chờ duyệt</span></div>
+    <div class="small muted">${esc(TYPES[a.type]||'')}, ${esc(a.district)}, ${esc(a.city)}. Giờ nhận ${esc(a.hours)}. Phụ trách: ${esc(a.contact)}</div>
+    <div class="actions"><button class="btn sm" data-app="${a.id}">Duyệt và thêm vào danh mục điểm thu</button></div></div>`).join('')
+    :`<div class="empty small">Chưa có đơn mới. Đơn gửi từ trang <a href="#dangkydiem">Đăng ký điểm thu</a> sẽ hiện ở đây.</div>`;
+  $('#apps').querySelectorAll('[data-app]').forEach(b=>b.addEventListener('click',()=>{const a=S.apps.find(x=>x.id===b.dataset.app);
+    const pre={'TP.HCM':'A','Hà Nội':'B','Đà Nẵng':'C','Huế':'D','Cần Thơ':'E'}[a.city];const id=pre+String(S.points.filter(p=>p.id[0]===pre).length+1).padStart(2,'0');
+    S.points.push({id,name:a.org,city:a.city,district:a.district,type:a.type,hours:a.hours,status:'open'});
+    S.apps=S.apps.filter(x=>x!==a);save();renderAll();toast(`Đã duyệt. ${a.org} xuất hiện trên trang Điểm thu với mã ${id}.`)}));
+}
+function renderUsers(){
+  $('#usersTbl').innerHTML=`<thead><tr><th>Họ tên</th><th>Email</th><th>SĐT</th><th>Vai trò</th><th>Ngày tạo</th><th class="num">Lần nộp</th><th class="num">Điểm hiện có</th></tr></thead><tbody>${S.users.map(u=>{const rs=u.role==='customer'?myReceipts(u):[];
+    return `<tr><td>${esc(u.name)}</td><td>${esc(u.email)}</td><td>${mask(u.phone)}</td><td><span class="badge ${u.role==='admin'?'admin':''}">${u.role==='admin'?'Quản lý':'Khách hàng'}</span></td><td>${fmtD(u.created)}</td><td class="num">${u.role==='customer'?rs.length:''}</td><td class="num">${u.role==='customer'?nf(balance(u)):''}</td></tr>`}).join('')}</tbody>`;
+}
+function renderAdmin(){
+  const u=me();if(!u||u.role!=='admin')return;
+  document.querySelectorAll('#admTabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab));
+  document.querySelectorAll('[data-panel]').forEach(p=>p.classList.toggle('hide',p.dataset.panel!==tab));
+  ({tong:()=>{renderOverview();renderDash()},hd:renderActAdmin,bv:renderPostAdmin,bm01:renderBM01,lo:renderLots,don:renderApps,tk:renderUsers})[tab]();
+  labelTables();
+}
+/* thẻ hoạt động */
+const ACT_TYPES={thu_gom:'Thu gom vỏ chai',su_kien:'Sự kiện',pin:'Thu hồi pin',refill:'Refill'};
+const ACT_ST={live:'Đang diễn ra',soon:'Sắp diễn ra',past:'Đã diễn ra',info:'Chương trình khác'};
+const ACT_ORDER={live:0,soon:1,info:2,past:3};
+function actStatus(a){if(a.archived)return'past';if(!a.start)return'info';if(a.start>TODAY)return'soon';if(a.end&&a.end<TODAY)return'past';return'live'}
+function actDates(a){if(!a.start)return'Không có mốc thời gian cố định';if(!a.end)return'Từ '+fmtD(a.start);return a.start===a.end?fmtD(a.start):`${fmtD(a.start)} đến ${fmtD(a.end)}`}
+function actCover(a){
+  if(a.type==='pin')return `<svg viewBox="0 0 80 120" aria-hidden="true"><ellipse cx="40" cy="113" rx="22" ry="3" fill="#000" opacity=".12"/><rect x="30" y="14" width="20" height="8" rx="2" fill="#2C3B2F"/><rect x="20" y="20" width="40" height="92" rx="8" fill="#3E7D4C"/><path d="M45 40 32 66h10l-4 24 15-30H43z" fill="#F2DE74"/></svg>`;
+  if(a.type==='refill')return `<svg viewBox="0 0 80 120" aria-hidden="true"><ellipse cx="40" cy="113" rx="22" ry="3" fill="#000" opacity=".12"/><rect x="34" y="10" width="12" height="12" rx="2" fill="#2C3B2F"/><path d="M22 24h36l4 82a6 6 0 0 1-6 6H24a6 6 0 0 1-6-6z" fill="#A9CF8F"/><rect x="28" y="58" width="24" height="26" rx="3" fill="rgba(255,255,255,.88)"/><path d="M36 74c0-5 4-8 9-8 0 5-4 8-9 8z" fill="#2F6B3A"/></svg>`+bottle('pump','#B7C84E');
+  if(a.type==='su_kien')return bottle('jar','#D8708A')+bottle('tall','#9CC98A')+bottle('tube','#EDB4C4');
+  return bottle('tall','#9CC98A')+bottle('pump','#C99D62');
+}
+const ACT_BG={thu_gom:'#9CC98A',su_kien:'#EDB4C4',pin:'#F2DE74',refill:'#B7C84E'};
+function actCard(a){const st=actStatus(a);
+  return `<article class="act"><div class="cover" style="background:color-mix(in srgb,${ACT_BG[a.type]} 28%,var(--surface))"><span class="pill ${st}">${ACT_ST[st]}</span>${actCover(a)}</div>
+   <div class="body"><span class="tag">${ACT_TYPES[a.type]}${a.demo?', giả định':''}</span><h3>${esc(a.title)}</h3>
+   <div class="when">${actDates(a)}${a.place?`. ${esc(a.place)}`:''}</div>
+   ${a.rule?`<div class="rule"><b>Quy tắc:</b> ${esc(a.rule)}</div>`:''}
+   ${a.result?`<div class="res">${esc(a.result)}</div>`:''}
+   ${a.desc?`<details><summary>Xem chi tiết</summary><p>${esc(a.desc)}</p></details>`:''}
+   ${a.post&&S.posts.some(p=>p.id===a.post&&p.visible)?`<a class="small" style="font-weight:600" href="#bv-${a.post}">Đọc bài viết về hoạt động này</a>`:''}</div></article>`}
+const sortActs=list=>[...list].sort((x,y)=>ACT_ORDER[actStatus(x)]-ACT_ORDER[actStatus(y)]||(y.start||'').localeCompare(x.start||''));
+let actF='all';
+$('#actFilters').innerHTML=[['all','Tất cả'],...Object.entries(ACT_ST)].map(([k,v])=>`<button data-af="${k}" aria-pressed="${k==='all'}">${v}</button>`).join('');
+document.querySelectorAll('[data-af]').forEach(b=>b.addEventListener('click',()=>{actF=b.dataset.af;document.querySelectorAll('[data-af]').forEach(x=>x.setAttribute('aria-pressed',x===b));renderActs()}));
+function renderActs(){
+  const pub=S.activities.filter(a=>a.visible);
+  const list=sortActs(pub.filter(a=>actF==='all'||actStatus(a)===actF));
+  $('#actGrid').innerHTML=list.length?list.map(actCard).join(''):`<div class="empty">Chưa có hoạt động ở mục này.</div>`;
+  const hl=sortActs(pub.filter(a=>['live','soon'].includes(actStatus(a)))).slice(0,3);
+  $('#homeActs').innerHTML=hl.length?hl.map(actCard).join(''):`<div class="empty">Chưa có hoạt động sắp diễn ra. <a href="#hoatdong">Xem các chương trình trước</a></div>`;
+}
+$('#actType').innerHTML=Object.entries(ACT_TYPES).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+function actFormReset(){const f=$('#actForm');f.reset();f.id.value='';$('#actFormTitle').textContent='Thêm thẻ hoạt động';$('#actCancel').classList.add('hide');$('#actErr').textContent=''}
+$('#actCancel').addEventListener('click',actFormReset);
+$('#actForm').addEventListener('submit',e=>{e.preventDefault();const f=e.target;
+  if(!f.title.value.trim())return $('#actErr').textContent='Nhập tên hoạt động.';
+  if(f.end.value&&!f.start.value)return $('#actErr').textContent='Có ngày kết thúc thì cần ngày bắt đầu.';
+  if(f.end.value&&f.end.value<f.start.value)return $('#actErr').textContent='Ngày kết thúc phải sau ngày bắt đầu.';
+  const data={title:f.title.value.trim(),type:f.type.value,place:f.place.value.trim(),start:f.start.value,end:f.end.value,desc:f.desc.value.trim(),rule:f.rule.value.trim(),result:f.result.value.trim(),visible:f.visible.checked,demo:f.demo.checked};
+  if(f.id.value){Object.assign(S.activities.find(a=>a.id===f.id.value),data);toast('Đã cập nhật thẻ hoạt động.')}
+  else{S.activities.push({id:'HD'+(S.aSeq++),archived:false,...data});toast('Đã thêm thẻ hoạt động. Thẻ hiện trên trang Hoạt động nếu bật hiển thị.')}
+  save();actFormReset();renderAll()});
+function renderActAdmin(){
+  $('#actList').innerHTML=sortActs(S.activities).map(a=>{const st=actStatus(a);
+    return `<div class="arow ${a.visible?'':'off'}"><div><b>${esc(a.title)}</b><div class="small muted">${ACT_TYPES[a.type]}. ${actDates(a)}${a.visible?'':'. Đang ẩn'}</div></div><span class="pill ${st}">${ACT_ST[st]}</span>
+     <div class="actions"><button class="btn ghost sm" data-ae="${a.id}">Sửa</button><button class="btn ghost sm" data-av="${a.id}">${a.visible?'Ẩn':'Hiện'}</button><button class="btn ghost sm" data-aa="${a.id}">${a.archived?'Bỏ lưu trữ':'Lưu trữ'}</button><button class="btn danger sm" data-ad="${a.id}">Xóa</button></div></div>`}).join('');
+  const A=id=>S.activities.find(a=>a.id===id);
+  document.querySelectorAll('[data-ae]').forEach(b=>b.addEventListener('click',()=>{const a=A(b.dataset.ae),f=$('#actForm');
+    ['id','title','type','place','start','end','desc','rule','result'].forEach(k=>f[k].value=a[k]||'');f.visible.checked=a.visible;f.demo.checked=!!a.demo;
+    $('#actFormTitle').textContent='Sửa thẻ hoạt động';$('#actCancel').classList.remove('hide');f.title.focus();f.scrollIntoView({block:'start'})}));
+  document.querySelectorAll('[data-av]').forEach(b=>b.addEventListener('click',()=>{const a=A(b.dataset.av);a.visible=!a.visible;save();renderAll();toast(a.visible?'Thẻ đã hiện trên trang công khai.':'Đã ẩn thẻ khỏi trang công khai.')}));
+  document.querySelectorAll('[data-aa]').forEach(b=>b.addEventListener('click',()=>{const a=A(b.dataset.aa);a.archived=!a.archived;save();renderAll();toast(a.archived?'Đã chuyển thẻ sang Đã diễn ra.':'Đã bỏ lưu trữ thẻ.')}));
+  document.querySelectorAll('[data-ad]').forEach(b=>b.addEventListener('click',()=>{const a=A(b.dataset.ad);if(!confirm(`Xóa thẻ “${a.title}”?`))return;S.activities=S.activities.filter(x=>x!==a);save();renderAll();toast('Đã xóa thẻ hoạt động.')}));
+}
+
+/* số liệu tổng toàn chiến dịch */
+function renderOverview(){
+  const R=S.receipts, valid=sum(R,r=>r.large+r.small);
+  const kg=sum(S.lots.filter(l=>l.recon&&IDX[l.status]>=IDX.doi_soat),l=>l.recon.theirs.kg);
+  const custs=S.users.filter(u=>u.role==='customer');const vs=custs.flatMap(u=>u.vouchers);
+  const live=S.activities.filter(a=>a.visible&&actStatus(a)==='live').length, soon=S.activities.filter(a=>a.visible&&actStatus(a)==='soon').length;
+  $('#overview').innerHTML=[
+    ['Tổng vỏ hợp lệ đã thu',nf(valid),`${nf(sum(R,r=>r.large))} lớn, ${nf(sum(R,r=>r.small))} nhỏ`],
+    ['Khối lượng đã đối soát',pct(kg)+' kg','theo phiếu BM02'],
+    ['Phiếu BM01, lô',`${R.length}, ${S.lots.length}`,`${S.lots.filter(l=>l.status==='tai_che').length} lô tái chế hoàn tất`],
+    ['Điểm thu đang nhận',`${S.points.filter(p=>p.status==='open').length}/${S.points.length}`,`${S.apps.length} đơn chờ duyệt`],
+    ['Thành viên xanh',custs.length,`${new Set(R.filter(r=>r.phone).map(r=>r.phone)).size} người đã nộp vỏ`],
+    ['Túi vải đã quy đổi',nf(sum(R.filter(r=>!r.phone),r=>gifts(r.large,r.small))+vs.filter(v=>v.used).length),`${vs.filter(v=>!v.used).length} phiếu thành viên chưa nhận`],
+    ['Hoạt động đang diễn ra',live,`${soon} hoạt động sắp diễn ra`],
+    ['Góp ý BM04',S.fb.length,`${S.fb.length?Math.round(S.fb.filter(f=>f.q1>=4).length/S.fb.length*100):0}% hài lòng`]
+  ].map(([a,b,c])=>`<div><span>${a}</span><strong>${b}</strong><em>${c}</em></div>`).join('');
+  bars('#topPoints',S.points.map(p=>[p.name.replace('Điểm thu mẫu ','Điểm ')+`, ${p.city}`,sum(R.filter(r=>r.point===p.id),r=>r.large+r.small)]).sort((a,b)=>b[1]-a[1]).slice(0,5));
+  const ev=[];
+  R.forEach(r=>{const u=r.phone&&userByPhone(r.phone);ev.push([r.date,`${pt(r.point).name}: ghi nhận ${r.large+r.small} vỏ${u?`, cộng điểm cho ${esc(u.name)}`:''}`])});
+  S.lots.forEach(l=>{if(l.handover)ev.push([l.handover,`Bàn giao lô ${l.id}`]);if(l.recon)ev.push([l.recon.date,`Đối soát BM02 lô ${l.id}`]);if(l.approve)ev.push([l.approve.date,`Duyệt công bố lô ${l.id}`]);if(l.recycle)ev.push([l.recycle.date,`Nhận chứng từ ${esc(l.recycle.doc)}, lô ${l.id} tái chế hoàn tất`])});
+  custs.forEach(u=>{ev.push([u.created,`${esc(u.name)} đăng ký thành viên xanh`]);u.vouchers.forEach(v=>ev.push([v.date,`${esc(u.name)} tạo phiếu đổi quà ${v.code}`]))});
+  $('#feed').innerHTML=ev.sort((a,b)=>b[0].localeCompare(a[0])).slice(0,8).map(([d,t])=>`<li><time>${fmtD(d)}</time><span>${t}</span></li>`).join('');
+}
+
+/* bài viết */
+const POST_CATS={quy_dinh:'Quy định, thể lệ',thu_gom:'Hoạt động thu gom',pin:'Thu hồi pin',huong_dan:'Hướng dẫn',tin_xanh:'Tin xanh'};
+const inl=t=>esc(t).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+function md(src){return String(src||'').trim().split(/\n\s*\n/).map(b=>{const L=b.split('\n');
+  if(L[0].startsWith('## ')){const rest=L.slice(1).join('\n');return `<h3>${inl(L[0].slice(3))}</h3>`+(rest.trim()?md(rest):'')}
+  const i=L.findIndex(l=>/^(- |\d+\. )/.test(l));
+  if(i>0)return md(L.slice(0,i).join('\n'))+md(L.slice(i).join('\n'));
+  if(L.every(l=>/^- /.test(l)))return `<ul>${L.map(l=>`<li>${inl(l.slice(2))}</li>`).join('')}</ul>`;
+  if(L.every(l=>/^\d+\. /.test(l)))return `<ol>${L.map(l=>`<li>${inl(l.replace(/^\d+\. /,''))}</li>`).join('')}</ol>`;
+  return `<p>${inl(L.join(' '))}</p>`}).join('')}
+const postDate=p=>p.dateText||fmtD(p.date);
+const readMin=p=>Math.max(1,Math.round(String(p.body).split(/\s+/).length/220));
+function postArt(p){const a=S.activities.find(x=>x.id===p.act);
+  if(p.cat==='pin'||(a&&a.type==='pin'))return actCover({type:'pin'});
+  if(p.cat==='huong_dan')return bottle('jar','#D8708A')+bottle('tall','#9CC98A');
+  if(p.cat==='quy_dinh')return bottle('dropper','#E7A33A')+bottle('jar','#77513A')+bottle('pump','#C99D62');
+  return bottle('tall','#9CC98A')+bottle('tube','#EDB4C4')}
+function postCover(p){return `<div class="pcover"><div class="ct">${esc(p.coverText||POST_CATS[p.cat])}<small>${POST_CATS[p.cat]}</small></div>${postArt(p)}</div>`}
+function postCard(p,feature){return `<a class="post${feature?' feature':''}" href="#bv-${p.id}">${postCover(p)}<div class="pb"><span class="meta">${POST_CATS[p.cat]}${p.demo?', giả định':''}. ${postDate(p)}</span><h3>${esc(p.title)}</h3><p>${esc(p.summary)}</p><span class="small" style="color:var(--leaf);font-weight:600;margin-top:4px">Đọc bài, ${readMin(p)} phút</span></div></a>`}
+const visiblePosts=()=>S.posts.filter(p=>p.visible).sort((a,b)=>(!!b.pinned-!!a.pinned)||b.date.localeCompare(a.date));
+let postF='all';
+$('#postFilters').innerHTML=[['all','Tất cả'],...Object.entries(POST_CATS)].map(([k,v])=>`<button data-pf="${k}" aria-pressed="${k==='all'}">${v}</button>`).join('');
+document.querySelectorAll('[data-pf]').forEach(b=>b.addEventListener('click',()=>{postF=b.dataset.pf;document.querySelectorAll('[data-pf]').forEach(x=>x.setAttribute('aria-pressed',x===b));renderPosts()}));
+$('#postQ').addEventListener('input',()=>renderPosts());
+function renderPosts(){
+  const vp=visiblePosts();
+  $('#homePosts').innerHTML=vp.slice(0,3).map(p=>postCard(p)).join('');
+  const p=openPost&&vp.find(x=>x.id===openPost);
+  $('#postList').classList.toggle('hide',!!p);$('#postView').classList.toggle('hide',!p);
+  if(p){
+    const a=S.activities.find(x=>x.id===p.act&&x.visible);
+    const rel=vp.filter(x=>x!==p&&x.cat===p.cat).concat(vp.filter(x=>x!==p&&x.cat!==p.cat)).slice(0,2);
+    $('#postView').innerHTML=`<a class="back" href="#baiviet">‹ Tất cả bài viết</a>
+      <div class="meta">${POST_CATS[p.cat]}${p.demo?', nội dung giả định':''}. ${postDate(p)}. ${esc(p.author||'')}. ${readMin(p)} phút đọc</div>
+      <h1>${esc(p.title)}</h1><p class="lead muted">${esc(p.summary)}</p>${postCover(p)}
+      <div class="abody">${md(p.body)}</div>
+      ${p.srcName||p.srcUrl?`<div class="srcbox"><b>Nguồn:</b> ${esc(p.srcName)}${p.srcUrl?`. <a href="${esc(p.srcUrl)}" target="_blank" rel="noopener">Xem bài gốc</a>`:''}. Nội dung trên cổng được tóm tắt, viết lại; khi có khác biệt, quy định trong bài gốc là căn cứ.</div>`:''}
+      ${a?`<h3 style="margin-top:32px">Hoạt động liên quan</h3><div class="acts" style="grid-template-columns:minmax(0,420px)">${actCard(a)}</div>`:''}
+      ${rel.length?`<h3 style="margin-top:32px">Bài viết khác</h3><div class="posts">${rel.map(x=>postCard(x)).join('')}</div>`:''}`;
+    document.title=p.title+' | Thu gom vỏ chai Cocoon';
+    return;
+  }
+  document.title='Cổng thông tin Thu gom Vỏ chai Cocoon (bản demo)';
+  const q=$('#postQ').value.trim().toLowerCase();
+  const list=vp.filter(x=>(postF==='all'||x.cat===postF)&&(!q||(x.title+' '+x.summary+' '+x.body).toLowerCase().includes(q)));
+  $('#postGrid').innerHTML=list.length?list.map((x,i)=>postCard(x,i===0&&postF==='all'&&!q)).join(''):`<div class="empty">Không có bài viết phù hợp. Thử từ khóa khác hoặc chọn “Tất cả”.</div>`;
+}
+$('#postCat').innerHTML=Object.entries(POST_CATS).map(([k,v])=>`<option value="${k}">${v}</option>`).join('');
+function postFormReset(){const f=$('#postForm');f.reset();f.id.value='';f.date.value=TODAY;$('#postFormTitle').textContent='Thêm bài viết';$('#postCancel').classList.add('hide');$('#postErr').textContent=''}
+$('#postCancel').addEventListener('click',postFormReset);
+$('#postForm').addEventListener('submit',e=>{e.preventDefault();const f=e.target;
+  if(!f.title.value.trim()||!f.summary.value.trim()||!f.body.value.trim())return $('#postErr').textContent='Cần có tiêu đề, tóm tắt và nội dung.';
+  if(!f.date.value)return $('#postErr').textContent='Chọn ngày đăng.';
+  const d={title:f.title.value.trim(),cat:f.cat.value,date:f.date.value,dateText:'',author:f.author.value.trim(),coverText:f.coverText.value.trim(),summary:f.summary.value.trim(),body:f.body.value,srcName:f.srcName.value.trim(),srcUrl:f.srcUrl.value.trim(),act:f.act.value,visible:f.visible.checked,pinned:f.pinned.checked,demo:f.demo.checked};
+  if(f.id.value){Object.assign(S.posts.find(p=>p.id===f.id.value),d);toast('Đã cập nhật bài viết.')}
+  else{S.posts.push({id:'BV'+(S.pSeq++),...d});toast('Đã đăng bài viết.')}
+  save();postFormReset();renderAll()});
+function renderPostAdmin(){
+  $('#postAct').innerHTML='<option value="">Không gắn</option>'+S.activities.map(a=>`<option value="${a.id}">${esc(a.title)}</option>`).join('');
+  if(!$('#postForm').id.value&&!$('#postForm').date.value)$('#postForm').date.value=TODAY;
+  $('#postAdmList').innerHTML=[...S.posts].sort((a,b)=>b.date.localeCompare(a.date)).map(p=>`<div class="arow ${p.visible?'':'off'}"><div><b>${esc(p.title)}</b><div class="small muted">${POST_CATS[p.cat]}. ${postDate(p)}${p.pinned?'. Đang ghim':''}${p.visible?'':'. Đang ẩn'}</div></div><a class="btn ghost sm" href="#bv-${p.id}">Xem</a>
+    <div class="actions"><button class="btn ghost sm" data-pe="${p.id}">Sửa</button><button class="btn ghost sm" data-pv="${p.id}">${p.visible?'Ẩn':'Hiện'}</button><button class="btn danger sm" data-pd="${p.id}">Xóa</button></div></div>`).join('');
+  const P=id=>S.posts.find(p=>p.id===id);
+  document.querySelectorAll('[data-pe]').forEach(b=>b.addEventListener('click',()=>{const p=P(b.dataset.pe),f=$('#postForm');
+    ['id','title','cat','date','author','coverText','summary','body','srcName','srcUrl'].forEach(k=>f[k].value=p[k]||'');f.act.value=p.act||'';f.visible.checked=p.visible;f.pinned.checked=!!p.pinned;f.demo.checked=!!p.demo;
+    $('#postFormTitle').textContent='Sửa bài viết';$('#postCancel').classList.remove('hide');f.scrollIntoView({block:'start'});f.title.focus()}));
+  document.querySelectorAll('[data-pv]').forEach(b=>b.addEventListener('click',()=>{const p=P(b.dataset.pv);p.visible=!p.visible;save();renderAll();toast(p.visible?'Bài viết đã hiện trên trang công khai.':'Đã ẩn bài viết.')}));
+  document.querySelectorAll('[data-pd]').forEach(b=>b.addEventListener('click',()=>{const p=P(b.dataset.pd);if(!confirm(`Xóa bài “${p.title}”?`))return;S.posts=S.posts.filter(x=>x!==p);save();renderAll();toast('Đã xóa bài viết.')}));
+}
+
+function renderAll(){renderAuthUI();renderHome();renderActs();renderPosts();renderPoints();ruleCalc();renderTries();renderProfile();renderAdmin();labelTables()}
+route();
+})();
+</script>
+</body>
+</html>
